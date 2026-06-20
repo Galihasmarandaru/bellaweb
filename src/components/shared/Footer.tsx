@@ -15,7 +15,7 @@ export function Footer({ className }: FooterProps) {
     >
       <div className="mb-8 flex gap-6 text-[#1b3b2c]">
         <a
-          href="https://instagram.com"
+          href="https://www.instagram.com/bellarhemaagnesia/"
           target="_blank"
           rel="noopener noreferrer"
           className="transition-colors hover:text-emerald-700"
@@ -23,7 +23,7 @@ export function Footer({ className }: FooterProps) {
           <FaInstagram size={24} />
         </a>
         <a
-          href="https://tiktok.com"
+          href="https://www.tiktok.com/@bellarhemaagnesiaa?is_from_webapp=1&sender_device=pc"
           target="_blank"
           rel="noopener noreferrer"
           className="transition-colors hover:text-emerald-700"
