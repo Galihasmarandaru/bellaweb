@@ -15,6 +15,7 @@ import { Route as AccomodationRouteImport } from './routes/accomodation'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminSpillLinkRouteImport } from './routes/admin/spill-link'
+import { Route as AccomodationCategoryIdRouteImport } from './routes/accomodation.$categoryId'
 import { Route as AdminPenginapanIndexRouteImport } from './routes/admin/penginapan/index'
 import { Route as AdminPenginapanCreateRouteImport } from './routes/admin/penginapan/create'
 import { Route as AdminPenginapanIdEditRouteImport } from './routes/admin/penginapan/$id.edit'
@@ -49,6 +50,11 @@ const AdminSpillLinkRoute = AdminSpillLinkRouteImport.update({
   path: '/spill-link',
   getParentRoute: () => AdminRoute,
 } as any)
+const AccomodationCategoryIdRoute = AccomodationCategoryIdRouteImport.update({
+  id: '/$categoryId',
+  path: '/$categoryId',
+  getParentRoute: () => AccomodationRoute,
+} as any)
 const AdminPenginapanIndexRoute = AdminPenginapanIndexRouteImport.update({
   id: '/penginapan/',
   path: '/penginapan/',
@@ -67,9 +73,10 @@ const AdminPenginapanIdEditRoute = AdminPenginapanIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/accomodation': typeof AccomodationRoute
+  '/accomodation': typeof AccomodationRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/accomodation/$categoryId': typeof AccomodationCategoryIdRoute
   '/admin/spill-link': typeof AdminSpillLinkRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/penginapan/create': typeof AdminPenginapanCreateRoute
@@ -78,8 +85,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/accomodation': typeof AccomodationRoute
+  '/accomodation': typeof AccomodationRouteWithChildren
   '/login': typeof LoginRoute
+  '/accomodation/$categoryId': typeof AccomodationCategoryIdRoute
   '/admin/spill-link': typeof AdminSpillLinkRoute
   '/admin': typeof AdminIndexRoute
   '/admin/penginapan/create': typeof AdminPenginapanCreateRoute
@@ -89,9 +97,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/accomodation': typeof AccomodationRoute
+  '/accomodation': typeof AccomodationRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/accomodation/$categoryId': typeof AccomodationCategoryIdRoute
   '/admin/spill-link': typeof AdminSpillLinkRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/penginapan/create': typeof AdminPenginapanCreateRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/accomodation'
     | '/admin'
     | '/login'
+    | '/accomodation/$categoryId'
     | '/admin/spill-link'
     | '/admin/'
     | '/admin/penginapan/create'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
     | '/'
     | '/accomodation'
     | '/login'
+    | '/accomodation/$categoryId'
     | '/admin/spill-link'
     | '/admin'
     | '/admin/penginapan/create'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/accomodation'
     | '/admin'
     | '/login'
+    | '/accomodation/$categoryId'
     | '/admin/spill-link'
     | '/admin/'
     | '/admin/penginapan/create'
@@ -135,7 +147,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AccomodationRoute: typeof AccomodationRoute
+  AccomodationRoute: typeof AccomodationRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRoute
 }
@@ -184,6 +196,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSpillLinkRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/accomodation/$categoryId': {
+      id: '/accomodation/$categoryId'
+      path: '/$categoryId'
+      fullPath: '/accomodation/$categoryId'
+      preLoaderRoute: typeof AccomodationCategoryIdRouteImport
+      parentRoute: typeof AccomodationRoute
+    }
     '/admin/penginapan/': {
       id: '/admin/penginapan/'
       path: '/penginapan'
@@ -208,6 +227,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AccomodationRouteChildren {
+  AccomodationCategoryIdRoute: typeof AccomodationCategoryIdRoute
+}
+
+const AccomodationRouteChildren: AccomodationRouteChildren = {
+  AccomodationCategoryIdRoute: AccomodationCategoryIdRoute,
+}
+
+const AccomodationRouteWithChildren = AccomodationRoute._addFileChildren(
+  AccomodationRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminSpillLinkRoute: typeof AdminSpillLinkRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -228,7 +259,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AccomodationRoute: AccomodationRoute,
+  AccomodationRoute: AccomodationRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
 }

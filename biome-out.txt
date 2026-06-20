@@ -1,0 +1,316 @@
+src/features/cms/components/Cms.tsx:61:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    59 │         <h1·
+    60 │           className={cn(
+  > 61 │             "text-xl font-bold text-gray-800 absolute top-1/2 -translate-y-1/2",
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    62 │             activeView !== null ? "left-1/2 -translate-x-1/2" : "left-6"
+    63 │           )}
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+     59  59 │           <h1·
+     60  60 │             className={cn(
+     61     │ - ············"text-xl·font-bold·text-gray-800·absolute·top-1/2·-translate-y-1/2",
+         61 │ + ············"absolute·top-1/2·-translate-y-1/2·font-bold·text-gray-800·text-xl",
+     62  62 │               activeView !== null ? "left-1/2 -translate-x-1/2" : "left-6"
+     63  63 │             )}
+  
+
+src/features/cms/components/Cms.tsx:73:27 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    71 │               <Button·
+    72 │                 variant="outline"·
+  > 73 │                 className="flex h-10 w-10 items-center justify-center p-0 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+       │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │                 title="Logout"
+    75 │               >
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+     71  71 │                 <Button·
+     72  72 │                   variant="outline"·
+     73     │ - ················className="flex·h-10·w-10·items-center·justify-center·p-0·text-red-600·border-red-200·hover:bg-red-50·hover:text-red-700"
+         73 │ + ················className="flex·h-10·w-10·items-center·justify-center·border-red-200·p-0·text-red-600·hover:bg-red-50·hover:text-red-700"
+     74  74 │                   title="Logout"
+     75  75 │                 >
+  
+
+src/features/cms/components/Cms.tsx:101:25 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+     99 │             <Button·
+    100 │               onClick={() => setActiveView('penginapan')}
+  > 101 │               className="h-auto w-full rounded-xl border border-[#1b3b2c] bg-transparent px-6 py-10 text-center font-semibold text-lg text-[#1b3b2c] shadow-sm transition-transform hover:scale-[1.02] hover:bg-[#1b3b2c]/5"
+        │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    102 │             >
+    103 │               🏨 Kelola Penginapan
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+     99  99 │               <Button·
+    100 100 │                 onClick={() => setActiveView('penginapan')}
+    101     │ - ··············className="h-auto·w-full·rounded-xl·border·border-[#1b3b2c]·bg-transparent·px-6·py-10·text-center·font-semibold·text-lg·text-[#1b3b2c]·shadow-sm·transition-transform·hover:scale-[1.02]·hover:bg-[#1b3b2c]/5"
+        101 │ + ··············className="h-auto·w-full·rounded-xl·border·border-[#1b3b2c]·bg-transparent·px-6·py-10·text-center·font-semibold·text-[#1b3b2c]·text-lg·shadow-sm·transition-transform·hover:scale-[1.02]·hover:bg-[#1b3b2c]/5"
+    102 102 │               >
+    103 103 │                 🏨 Kelola Penginapan
+  
+
+src/features/cms/components/Cms.tsx:107:25 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    105 │             <Button·
+    106 │               onClick={() => setActiveView('spill_link')}
+  > 107 │               className="h-auto w-full rounded-xl border border-[#1b3b2c] bg-transparent px-6 py-10 text-center font-semibold text-lg text-[#1b3b2c] shadow-sm transition-transform hover:scale-[1.02] hover:bg-[#1b3b2c]/5"
+        │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    108 │             >
+    109 │               🔗 Kelola Spill Link
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    105 105 │               <Button·
+    106 106 │                 onClick={() => setActiveView('spill_link')}
+    107     │ - ··············className="h-auto·w-full·rounded-xl·border·border-[#1b3b2c]·bg-transparent·px-6·py-10·text-center·font-semibold·text-lg·text-[#1b3b2c]·shadow-sm·transition-transform·hover:scale-[1.02]·hover:bg-[#1b3b2c]/5"
+        107 │ + ··············className="h-auto·w-full·rounded-xl·border·border-[#1b3b2c]·bg-transparent·px-6·py-10·text-center·font-semibold·text-[#1b3b2c]·text-lg·shadow-sm·transition-transform·hover:scale-[1.02]·hover:bg-[#1b3b2c]/5"
+    108 108 │               >
+    109 109 │                 🔗 Kelola Spill Link
+  
+
+src/features/cms/components/Cms.tsx:121:26 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! These CSS classes should be sorted.
+  
+    120 │         {activeView === 'spill_link' && (
+  > 121 │           <div className="w-full max-w-5xl flex min-h-[50vh] items-center justify-center">
+        │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    122 │             <p className="text-gray-500 text-lg">Fitur Kelola Spill Link akan segera hadir!</p>
+    123 │           </div>
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    119 119 │   
+    120 120 │           {activeView === 'spill_link' && (
+    121     │ - ··········<div·className="w-full·max-w-5xl·flex·min-h-[50vh]·items-center·justify-center">
+        121 │ + ··········<div·className="flex·min-h-[50vh]·w-full·max-w-5xl·items-center·justify-center">
+    122 122 │               <p className="text-gray-500 text-lg">Fitur Kelola Spill Link akan segera hadir!</p>
+    123 123 │             </div>
+  
+
+src/features/cms/components/Cms.tsx:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  × Sort these imports.
+  
+   > 1 │ import {
+       │ ^^^^^^^^
+   > 2 │   AlertDialog,
+   > 3 │   AlertDialogAction,
+   > 4 │   AlertDialogCancel,
+        ...
+  > 13 │ import { useNavigate } from '@tanstack/react-router';
+  > 14 │ import { useState } from 'react';
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ import { AccomodationList } from '../../accomodation/components/AccomodationList.tsx';
+    16 │ import { authService } from '../../auth/services/authService.ts';
+  
+  i Safe fix: Organize imports and exports (Biome)
+  
+      1     │ - import·{
+      2     │ - ··AlertDialog,
+      3     │ - ··AlertDialogAction,
+      4     │ - ··AlertDialogCancel,
+      5     │ - ··AlertDialogContent,
+      6     │ - ··AlertDialogFooter,
+      7     │ - ··AlertDialogHeader,
+      8     │ - ··AlertDialogTitle,
+      9     │ - ··AlertDialogTrigger,
+     10     │ - }·from·'@/components/ui/alert-dialog';
+     11     │ - import·{·Button·}·from·'@/components/ui/button';
+     12     │ - import·{·cn·}·from·'@/lib/utils';
+     13     │ - import·{·useNavigate·}·from·'@tanstack/react-router';
+     14     │ - import·{·useState·}·from·'react';
+          1 │ + import·{·useNavigate·}·from·'@tanstack/react-router';
+          2 │ + import·{·useState·}·from·'react';
+          3 │ + import·{
+          4 │ + ··AlertDialog,
+          5 │ + ··AlertDialogAction,
+          6 │ + ··AlertDialogCancel,
+          7 │ + ··AlertDialogContent,
+          8 │ + ··AlertDialogFooter,
+          9 │ + ··AlertDialogHeader,
+         10 │ + ··AlertDialogTitle,
+         11 │ + ··AlertDialogTrigger,
+         12 │ + }·from·'@/components/ui/alert-dialog';
+         13 │ + import·{·Button·}·from·'@/components/ui/button';
+         14 │ + import·{·cn·}·from·'@/lib/utils';
+     15  15 │   import { AccomodationList } from '../../accomodation/components/AccomodationList.tsx';
+     16  16 │   import { authService } from '../../auth/services/authService.ts';
+  
+
+src/features/cms/components/Cms.tsx:51:15 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Alternative text title element cannot be empty
+  
+    49 │               title="Kembali"
+    50 │             >
+  > 51 │               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │                 <path d="m12 19-7-7 7-7"/>
+    53 │                 <path d="M19 12H5"/>
+  
+  i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.
+  
+
+src/features/cms/components/Cms.tsx:76:17 lint/a11y/noSvgWithoutTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Alternative text title element cannot be empty
+  
+    74 │                 title="Logout"
+    75 │               >
+  > 76 │                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    77 │                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+    78 │                   <polyline points="16 17 21 12 16 7"/>
+  
+  i For accessibility purposes, SVGs should have an alternative text, provided via title element. If the svg element has role="img", you should add the aria-label or aria-labelledby attribute.
+  
+
+src/features/cms/components/Cms.tsx format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+     37  37 │           <div className="flex w-[100px] items-center">
+     38  38 │             {activeView !== null && (
+     39     │ - ············<Button·
+     40     │ - ··············variant="outline"·
+     41     │ - ··············className="flex·h-10·w-10·items-center·justify-center·p-0"·
+         39 │ + ············<Button
+         40 │ + ··············variant="outline"
+         41 │ + ··············className="flex·h-10·w-10·items-center·justify-center·p-0"
+     42  42 │                 onClick={() => {
+     43  43 │                   if (isFormOpen) {
+    ······· │ 
+     49  49 │                 title="Kembali"
+     50  50 │               >
+     51     │ - ··············<svg·xmlns="http://www.w3.org/2000/svg"·width="20"·height="20"·viewBox="0·0·24·24"·fill="none"·stroke="currentColor"·strokeWidth="2.5"·strokeLinecap="round"·strokeLinejoin="round">
+     52     │ - ················<path·d="m12·19-7-7·7-7"/>
+     53     │ - ················<path·d="M19·12H5"/>
+         51 │ + ··············<svg
+         52 │ + ················xmlns="http://www.w3.org/2000/svg"
+         53 │ + ················width="20"
+         54 │ + ················height="20"
+         55 │ + ················viewBox="0·0·24·24"
+         56 │ + ················fill="none"
+         57 │ + ················stroke="currentColor"
+         58 │ + ················strokeWidth="2.5"
+         59 │ + ················strokeLinecap="round"
+         60 │ + ················strokeLinejoin="round"
+         61 │ + ··············>
+         62 │ + ················<path·d="m12·19-7-7·7-7"·/>
+         63 │ + ················<path·d="M19·12H5"·/>
+     54  64 │                 </svg>
+     55  65 │               </Button>
+     56  66 │             )}
+     57  67 │           </div>
+     58     │ - ········
+     59     │ - ········<h1·
+         68 │ + 
+         69 │ + ········<h1
+     60  70 │             className={cn(
+     61     │ - ············"text-xl·font-bold·text-gray-800·absolute·top-1/2·-translate-y-1/2",
+     62     │ - ············activeView·!==·null·?·"left-1/2·-translate-x-1/2"·:·"left-6"
+         71 │ + ············'text-xl·font-bold·text-gray-800·absolute·top-1/2·-translate-y-1/2',
+         72 │ + ············activeView·!==·null·?·'left-1/2·-translate-x-1/2'·:·'left-6',
+     63  73 │             )}
+     64  74 │           >
+    ······· │ 
+     69  79 │             <AlertDialog>
+     70  80 │               <AlertDialogTrigger asChild>
+     71     │ - ··············<Button·
+     72     │ - ················variant="outline"·
+         81 │ + ··············<Button
+         82 │ + ················variant="outline"
+     73  83 │                   className="flex h-10 w-10 items-center justify-center p-0 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+     74  84 │                   title="Logout"
+     75  85 │                 >
+     76     │ - ················<svg·xmlns="http://www.w3.org/2000/svg"·width="18"·height="18"·viewBox="0·0·24·24"·fill="none"·stroke="currentColor"·strokeWidth="2.5"·strokeLinecap="round"·strokeLinejoin="round">
+     77     │ - ··················<path·d="M9·21H5a2·2·0·0·1-2-2V5a2·2·0·0·1·2-2h4"/>
+     78     │ - ··················<polyline·points="16·17·21·12·16·7"/>
+     79     │ - ··················<line·x1="21"·y1="12"·x2="9"·y2="12"/>
+         86 │ + ················<svg
+         87 │ + ··················xmlns="http://www.w3.org/2000/svg"
+         88 │ + ··················width="18"
+         89 │ + ··················height="18"
+         90 │ + ··················viewBox="0·0·24·24"
+         91 │ + ··················fill="none"
+         92 │ + ··················stroke="currentColor"
+         93 │ + ··················strokeWidth="2.5"
+         94 │ + ··················strokeLinecap="round"
+         95 │ + ··················strokeLinejoin="round"
+         96 │ + ················>
+         97 │ + ··················<path·d="M9·21H5a2·2·0·0·1-2-2V5a2·2·0·0·1·2-2h4"·/>
+         98 │ + ··················<polyline·points="16·17·21·12·16·7"·/>
+         99 │ + ··················<line·x1="21"·y1="12"·x2="9"·y2="12"·/>
+     80 100 │                   </svg>
+     81 101 │                 </Button>
+    ······· │ 
+     87 107 │                 <AlertDialogFooter>
+     88 108 │                   <AlertDialogCancel>No</AlertDialogCancel>
+     89     │ - ················<AlertDialogAction·onClick={handleLogout}·className="bg-red-600·text-white·hover:bg-red-700">Yes</AlertDialogAction>
+        109 │ + ················<AlertDialogAction
+        110 │ + ··················onClick={handleLogout}
+        111 │ + ··················className="bg-red-600·text-white·hover:bg-red-700"
+        112 │ + ················>
+        113 │ + ··················Yes
+        114 │ + ················</AlertDialogAction>
+     90 115 │                 </AlertDialogFooter>
+     91 116 │               </AlertDialogContent>
+    ······· │ 
+     97 122 │           {activeView === null && (
+     98 123 │             <div className="mt-20 grid w-full max-w-md grid-cols-1 gap-4 sm:max-w-2xl sm:grid-cols-2">
+     99     │ - ············<Button·
+        124 │ + ············<Button
+    100 125 │                 onClick={() => setActiveView('penginapan')}
+    101 126 │                 className="h-auto w-full rounded-xl border border-[#1b3b2c] bg-transparent px-6 py-10 text-center font-semibold text-lg text-[#1b3b2c] shadow-sm transition-transform hover:scale-[1.02] hover:bg-[#1b3b2c]/5"
+    ······· │ 
+    103 128 │                 🏨 Kelola Penginapan
+    104 129 │               </Button>
+    105     │ - ············<Button·
+        130 │ + ············<Button
+    106 131 │                 onClick={() => setActiveView('spill_link')}
+    107 132 │                 className="h-auto w-full rounded-xl border border-[#1b3b2c] bg-transparent px-6 py-10 text-center font-semibold text-lg text-[#1b3b2c] shadow-sm transition-transform hover:scale-[1.02] hover:bg-[#1b3b2c]/5"
+  
+
+Checked 1 file in 58ms. No fixes applied.
+Found 4 errors.
+Found 5 warnings.
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+

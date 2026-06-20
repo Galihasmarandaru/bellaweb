@@ -20,13 +20,14 @@ export function Dashboard() {
       </div>
 
       <div className="mb-auto grid w-full max-w-md grid-cols-1 gap-4 sm:max-w-2xl sm:grid-cols-2">
-        <Button
-          asChild
-          className="h-auto w-full rounded-xl border border-[#1b3b2c] bg-transparent px-6 py-6 text-center font-semibold text-base text-[#1b3b2c] shadow-sm transition-transform hover:scale-[1.02] hover:bg-[#1b3b2c]/5"
-        >
-          <Link to="/accomodation">🏨 Spill Penginapan</Link>
-        </Button>
-        <Button className="h-auto w-full rounded-xl border border-[#1b3b2c] bg-transparent px-6 py-6 text-center font-semibold text-base text-[#1b3b2c] shadow-sm transition-transform hover:scale-[1.02] hover:bg-[#1b3b2c]/5">
+        <Link to="/accomodation" className="w-full block">
+          <Button
+            className="h-auto w-full rounded-xl border border-[#1b3b2c] bg-transparent px-6 py-6 text-center font-semibold text-base text-[#1b3b2c] shadow-sm transition-transform hover:scale-[1.02] hover:bg-[#1b3b2c]/5"
+          >
+            🏨 Spill Penginapan
+          </Button>
+        </Link>
+        <Button disabled className="h-auto w-full rounded-xl border border-gray-300 bg-gray-100 px-6 py-6 text-center font-semibold text-base text-gray-400 shadow-sm">
           🛍️ Spill Link
         </Button>
       </div>
