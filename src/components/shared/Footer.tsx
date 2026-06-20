@@ -1,4 +1,5 @@
 import { FaInstagram, FaTiktok } from 'react-icons/fa';
+import { FaThreads } from 'react-icons/fa6';
 import { cn } from '@/lib/utils';
 
 interface FooterProps {
@@ -29,6 +30,14 @@ export function Footer({ className }: FooterProps) {
           className="transition-colors hover:text-emerald-700"
         >
           <FaTiktok size={24} />
+        </a>
+        <a
+          href="https://www.threads.com/@bellarhemaagnesia?igshid=NTc4MTIwNjQ2YQ=="
+          target="_blank"
+          rel="noopener noreferrer"
+          className="transition-colors hover:text-emerald-700"
+        >
+          <FaThreads size={24} />
         </a>
       </div>
       <p className="font-medium text-gray-500 text-xs">
