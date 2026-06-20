@@ -1,11 +1,11 @@
 export interface AuthUser {
   id: string;
-  email: string;
+  username: string;
   name: string;
 }
 
 export interface LoginPayload {
-  email: string;
+  username: string;
   password: string;
 }
 

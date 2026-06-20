@@ -1,8 +1,16 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import { FaGoogle, FaInstagram } from 'react-icons/fa';
 import { LoginForm } from '../features/auth/index.ts';
+import { $isAuthenticated } from '../features/auth/stores/authStore.ts';
 
 export const Route = createFileRoute('/login')({
+  beforeLoad: () => {
+    if ($isAuthenticated.get()) {
+      throw redirect({
+        to: '/admin',
+      });
+    }
+  },
   component: RouteComponent,
 });
 

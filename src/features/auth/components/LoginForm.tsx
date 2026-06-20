@@ -1,15 +1,20 @@
 import { useForm } from '@tanstack/react-form';
+import { useNavigate } from '@tanstack/react-router';
 import { useLogin } from '../hooks/useLogin.ts';
 import { loginSchema } from '../schemas/authSchema.ts';
+import { setUser } from '../stores/authStore.ts';
 
 export function LoginForm() {
   const login = useLogin();
+  const navigate = useNavigate();
 
   const form = useForm({
-    defaultValues: { email: '', password: '' },
+    defaultValues: { username: '', password: '' },
     validators: { onChange: loginSchema },
     onSubmit: async ({ value }) => {
-      await login.mutateAsync(value);
+      const res = await login.mutateAsync(value);
+      setUser(res.user);
+      navigate({ to: '/admin' });
     },
   });
 
@@ -22,14 +27,14 @@ export function LoginForm() {
       className="mx-auto flex w-full max-w-sm flex-col gap-4 rounded-md border p-4 shadow-sm"
     >
       <h2 className="mb-2 font-bold text-xl">Login</h2>
-      <form.Field name="email">
+      <form.Field name="username">
         {(field) => (
           <div className="flex flex-col gap-1">
             <input
-              type="email"
+              type="text"
               value={field.state.value}
               onChange={(e) => field.handleChange(e.target.value)}
-              placeholder="Email"
+              placeholder="Username"
               className="rounded-md border px-3 py-2"
             />
             {field.state.meta.errors ? (

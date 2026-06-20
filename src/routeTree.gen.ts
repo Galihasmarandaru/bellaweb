@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as CmsRouteImport } from './routes/cms'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccomodationRouteImport } from './routes/accomodation'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccomodationDetailRouteImport } from './routes/accomodation_.detail'
@@ -20,9 +20,9 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CmsRoute = CmsRouteImport.update({
-  id: '/cms',
-  path: '/cms',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccomodationRoute = AccomodationRouteImport.update({
@@ -44,14 +44,14 @@ const AccomodationDetailRoute = AccomodationDetailRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/accomodation': typeof AccomodationRoute
-  '/cms': typeof CmsRoute
+  '/admin': typeof AdminRoute
   '/login': typeof LoginRoute
   '/accomodation/detail': typeof AccomodationDetailRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/accomodation': typeof AccomodationRoute
-  '/cms': typeof CmsRoute
+  '/admin': typeof AdminRoute
   '/login': typeof LoginRoute
   '/accomodation/detail': typeof AccomodationDetailRoute
 }
@@ -59,20 +59,25 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/accomodation': typeof AccomodationRoute
-  '/cms': typeof CmsRoute
+  '/admin': typeof AdminRoute
   '/login': typeof LoginRoute
   '/accomodation_/detail': typeof AccomodationDetailRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/accomodation' | '/cms' | '/login' | '/accomodation/detail'
+  fullPaths:
+    | '/'
+    | '/accomodation'
+    | '/admin'
+    | '/login'
+    | '/accomodation/detail'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/accomodation' | '/cms' | '/login' | '/accomodation/detail'
+  to: '/' | '/accomodation' | '/admin' | '/login' | '/accomodation/detail'
   id:
     | '__root__'
     | '/'
     | '/accomodation'
-    | '/cms'
+    | '/admin'
     | '/login'
     | '/accomodation_/detail'
   fileRoutesById: FileRoutesById
@@ -80,7 +85,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccomodationRoute: typeof AccomodationRoute
-  CmsRoute: typeof CmsRoute
+  AdminRoute: typeof AdminRoute
   LoginRoute: typeof LoginRoute
   AccomodationDetailRoute: typeof AccomodationDetailRoute
 }
@@ -94,11 +99,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/cms': {
-      id: '/cms'
-      path: '/cms'
-      fullPath: '/cms'
-      preLoaderRoute: typeof CmsRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/accomodation': {
@@ -128,7 +133,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccomodationRoute: AccomodationRoute,
-  CmsRoute: CmsRoute,
+  AdminRoute: AdminRoute,
   LoginRoute: LoginRoute,
   AccomodationDetailRoute: AccomodationDetailRoute,
 }
