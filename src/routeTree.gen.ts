@@ -9,16 +9,24 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SpillLinkRouteImport } from './routes/spill-link'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccomodationRouteImport } from './routes/accomodation'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as AdminSpillLinkRouteImport } from './routes/admin/spill-link'
+import { Route as AdminSpillLinkIndexRouteImport } from './routes/admin/spill-link/index'
 import { Route as AdminPenginapanIndexRouteImport } from './routes/admin/penginapan/index'
+import { Route as AdminSpillLinkCreateRouteImport } from './routes/admin/spill-link/create'
 import { Route as AdminPenginapanCreateRouteImport } from './routes/admin/penginapan/create'
+import { Route as AdminSpillLinkIdEditRouteImport } from './routes/admin/spill-link/$id.edit'
 import { Route as AdminPenginapanIdEditRouteImport } from './routes/admin/penginapan/$id.edit'
 
+const SpillLinkRoute = SpillLinkRouteImport.update({
+  id: '/spill-link',
+  path: '/spill-link',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -44,9 +52,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminSpillLinkRoute = AdminSpillLinkRouteImport.update({
-  id: '/spill-link',
-  path: '/spill-link',
+const AdminSpillLinkIndexRoute = AdminSpillLinkIndexRouteImport.update({
+  id: '/spill-link/',
+  path: '/spill-link/',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPenginapanIndexRoute = AdminPenginapanIndexRouteImport.update({
@@ -54,9 +62,19 @@ const AdminPenginapanIndexRoute = AdminPenginapanIndexRouteImport.update({
   path: '/penginapan/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSpillLinkCreateRoute = AdminSpillLinkCreateRouteImport.update({
+  id: '/spill-link/create',
+  path: '/spill-link/create',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPenginapanCreateRoute = AdminPenginapanCreateRouteImport.update({
   id: '/penginapan/create',
   path: '/penginapan/create',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSpillLinkIdEditRoute = AdminSpillLinkIdEditRouteImport.update({
+  id: '/spill-link/$id/edit',
+  path: '/spill-link/$id/edit',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPenginapanIdEditRoute = AdminPenginapanIdEditRouteImport.update({
@@ -70,21 +88,27 @@ export interface FileRoutesByFullPath {
   '/accomodation': typeof AccomodationRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
-  '/admin/spill-link': typeof AdminSpillLinkRoute
+  '/spill-link': typeof SpillLinkRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/penginapan/create': typeof AdminPenginapanCreateRoute
+  '/admin/spill-link/create': typeof AdminSpillLinkCreateRoute
   '/admin/penginapan/': typeof AdminPenginapanIndexRoute
+  '/admin/spill-link/': typeof AdminSpillLinkIndexRoute
   '/admin/penginapan/$id/edit': typeof AdminPenginapanIdEditRoute
+  '/admin/spill-link/$id/edit': typeof AdminSpillLinkIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/accomodation': typeof AccomodationRoute
   '/login': typeof LoginRoute
-  '/admin/spill-link': typeof AdminSpillLinkRoute
+  '/spill-link': typeof SpillLinkRoute
   '/admin': typeof AdminIndexRoute
   '/admin/penginapan/create': typeof AdminPenginapanCreateRoute
+  '/admin/spill-link/create': typeof AdminSpillLinkCreateRoute
   '/admin/penginapan': typeof AdminPenginapanIndexRoute
+  '/admin/spill-link': typeof AdminSpillLinkIndexRoute
   '/admin/penginapan/$id/edit': typeof AdminPenginapanIdEditRoute
+  '/admin/spill-link/$id/edit': typeof AdminSpillLinkIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -92,11 +116,14 @@ export interface FileRoutesById {
   '/accomodation': typeof AccomodationRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
-  '/admin/spill-link': typeof AdminSpillLinkRoute
+  '/spill-link': typeof SpillLinkRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/penginapan/create': typeof AdminPenginapanCreateRoute
+  '/admin/spill-link/create': typeof AdminSpillLinkCreateRoute
   '/admin/penginapan/': typeof AdminPenginapanIndexRoute
+  '/admin/spill-link/': typeof AdminSpillLinkIndexRoute
   '/admin/penginapan/$id/edit': typeof AdminPenginapanIdEditRoute
+  '/admin/spill-link/$id/edit': typeof AdminSpillLinkIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -105,32 +132,41 @@ export interface FileRouteTypes {
     | '/accomodation'
     | '/admin'
     | '/login'
-    | '/admin/spill-link'
+    | '/spill-link'
     | '/admin/'
     | '/admin/penginapan/create'
+    | '/admin/spill-link/create'
     | '/admin/penginapan/'
+    | '/admin/spill-link/'
     | '/admin/penginapan/$id/edit'
+    | '/admin/spill-link/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/accomodation'
     | '/login'
-    | '/admin/spill-link'
+    | '/spill-link'
     | '/admin'
     | '/admin/penginapan/create'
+    | '/admin/spill-link/create'
     | '/admin/penginapan'
+    | '/admin/spill-link'
     | '/admin/penginapan/$id/edit'
+    | '/admin/spill-link/$id/edit'
   id:
     | '__root__'
     | '/'
     | '/accomodation'
     | '/admin'
     | '/login'
-    | '/admin/spill-link'
+    | '/spill-link'
     | '/admin/'
     | '/admin/penginapan/create'
+    | '/admin/spill-link/create'
     | '/admin/penginapan/'
+    | '/admin/spill-link/'
     | '/admin/penginapan/$id/edit'
+    | '/admin/spill-link/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -138,10 +174,18 @@ export interface RootRouteChildren {
   AccomodationRoute: typeof AccomodationRoute
   AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRoute
+  SpillLinkRoute: typeof SpillLinkRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/spill-link': {
+      id: '/spill-link'
+      path: '/spill-link'
+      fullPath: '/spill-link'
+      preLoaderRoute: typeof SpillLinkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -177,11 +221,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/spill-link': {
-      id: '/admin/spill-link'
+    '/admin/spill-link/': {
+      id: '/admin/spill-link/'
       path: '/spill-link'
-      fullPath: '/admin/spill-link'
-      preLoaderRoute: typeof AdminSpillLinkRouteImport
+      fullPath: '/admin/spill-link/'
+      preLoaderRoute: typeof AdminSpillLinkIndexRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/penginapan/': {
@@ -191,11 +235,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPenginapanIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/spill-link/create': {
+      id: '/admin/spill-link/create'
+      path: '/spill-link/create'
+      fullPath: '/admin/spill-link/create'
+      preLoaderRoute: typeof AdminSpillLinkCreateRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/penginapan/create': {
       id: '/admin/penginapan/create'
       path: '/penginapan/create'
       fullPath: '/admin/penginapan/create'
       preLoaderRoute: typeof AdminPenginapanCreateRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/spill-link/$id/edit': {
+      id: '/admin/spill-link/$id/edit'
+      path: '/spill-link/$id/edit'
+      fullPath: '/admin/spill-link/$id/edit'
+      preLoaderRoute: typeof AdminSpillLinkIdEditRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/penginapan/$id/edit': {
@@ -209,19 +267,23 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
-  AdminSpillLinkRoute: typeof AdminSpillLinkRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminPenginapanCreateRoute: typeof AdminPenginapanCreateRoute
+  AdminSpillLinkCreateRoute: typeof AdminSpillLinkCreateRoute
   AdminPenginapanIndexRoute: typeof AdminPenginapanIndexRoute
+  AdminSpillLinkIndexRoute: typeof AdminSpillLinkIndexRoute
   AdminPenginapanIdEditRoute: typeof AdminPenginapanIdEditRoute
+  AdminSpillLinkIdEditRoute: typeof AdminSpillLinkIdEditRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminSpillLinkRoute: AdminSpillLinkRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminPenginapanCreateRoute: AdminPenginapanCreateRoute,
+  AdminSpillLinkCreateRoute: AdminSpillLinkCreateRoute,
   AdminPenginapanIndexRoute: AdminPenginapanIndexRoute,
+  AdminSpillLinkIndexRoute: AdminSpillLinkIndexRoute,
   AdminPenginapanIdEditRoute: AdminPenginapanIdEditRoute,
+  AdminSpillLinkIdEditRoute: AdminSpillLinkIdEditRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -231,6 +293,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccomodationRoute: AccomodationRoute,
   AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
+  SpillLinkRoute: SpillLinkRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

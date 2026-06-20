@@ -4,10 +4,10 @@ import type { CreateCategoryPayload } from '../types/category.types';
 
 export const CATEGORIES_QUERY_KEY = ['categories'];
 
-export const useCategories = () => {
+export const useCategories = (type?: 'accomodation' | 'spill') => {
   return useQuery({
-    queryKey: CATEGORIES_QUERY_KEY,
-    queryFn: getCategories,
+    queryKey: [...CATEGORIES_QUERY_KEY, type],
+    queryFn: () => getCategories(type),
   });
 };
 

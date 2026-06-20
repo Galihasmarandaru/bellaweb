@@ -9,9 +9,10 @@ interface CategoryFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
+  type: 'accomodation' | 'spill';
 }
 
-export function CategoryFormDialog({ open, onOpenChange, onSuccess }: CategoryFormDialogProps) {
+export function CategoryFormDialog({ open, onOpenChange, onSuccess, type }: CategoryFormDialogProps) {
   const createMutation = useCreateCategory();
 
   const form = useForm({
@@ -21,7 +22,7 @@ export function CategoryFormDialog({ open, onOpenChange, onSuccess }: CategoryFo
     validators: { onChange: categorySchema },
     onSubmit: async ({ value }) => {
       try {
-        await createMutation.mutateAsync({ name: value.name });
+        await createMutation.mutateAsync({ name: value.name, type });
         form.reset();
         onOpenChange(false);
         if (onSuccess) onSuccess();

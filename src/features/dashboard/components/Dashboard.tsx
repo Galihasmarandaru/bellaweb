@@ -27,9 +27,11 @@ export function Dashboard() {
             🏨 Spill Penginapan
           </Button>
         </Link>
-        <Button disabled className="h-auto w-full rounded-xl border border-gray-300 bg-gray-100 px-6 py-6 text-center font-semibold text-base text-gray-400 shadow-sm">
-          🛍️ Spill Link
-        </Button>
+        <Link to="/spill-link" className="w-full block">
+          <Button className="h-auto w-full rounded-xl border border-[#1b3b2c] bg-transparent px-6 py-6 text-center font-semibold text-base text-[#1b3b2c] shadow-sm transition-transform hover:scale-[1.02] hover:bg-[#1b3b2c]/5">
+            🛍️ Spill Link
+          </Button>
+        </Link>
       </div>
 
       <Footer />

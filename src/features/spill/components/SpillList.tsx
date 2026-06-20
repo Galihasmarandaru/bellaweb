@@ -14,35 +14,35 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
 import { Heart } from 'lucide-react';
-import { useAccomodations, useDeleteAccomodation, useUpdateAccomodation } from '../hooks/useAccomodation.ts';
+import { useSpills, useDeleteSpill, useUpdateSpill } from '../hooks/useSpill.ts';
 import { useCategories } from '../../category/hooks/useCategory.ts';
 import { Link } from '@tanstack/react-router';
 
-export function AccomodationList() {
-  const { data: accomodations, isLoading: isAccomodationsLoading, isError: isAccomodationsError } = useAccomodations();
-  const { data: categories, isLoading: isCategoriesLoading, isError: isCategoriesError } = useCategories('accomodation');
-  const deleteMutation = useDeleteAccomodation();
-  const updateMutation = useUpdateAccomodation();
+export function SpillList() {
+  const { data: spills, isLoading: isSpillsLoading, isError: isSpillsError } = useSpills();
+  const { data: categories, isLoading: isCategoriesLoading, isError: isCategoriesError } = useCategories('spill');
+  const deleteMutation = useDeleteSpill();
+  const updateMutation = useUpdateSpill();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-  const hasFavourites = accomodations?.some(a => a.is_favourite);
-  const activeCategoryIds = new Set(accomodations?.map(a => a.category_id).filter(Boolean));
+  const hasFavourites = spills?.some(a => a.is_favourite);
+  const activeCategoryIds = new Set(spills?.map(a => a.category_id).filter(Boolean));
   const activeCategories = categories?.filter(c => activeCategoryIds.has(c.id)) || [];
 
-  const filteredAccomodations = selectedCategoryId === 'favourite'
-    ? accomodations?.filter(a => a.is_favourite)
+  const filteredSpills = selectedCategoryId === 'favourite'
+    ? spills?.filter(a => a.is_favourite)
     : selectedCategoryId 
-      ? accomodations?.filter(a => a.category_id === selectedCategoryId)
-      : accomodations;
+      ? spills?.filter(a => a.category_id === selectedCategoryId)
+      : spills;
 
-  const isLoading = isAccomodationsLoading || isCategoriesLoading;
-  const isError = isAccomodationsError || isCategoriesError;
+  const isLoading = isSpillsLoading || isCategoriesLoading;
+  const isError = isSpillsError || isCategoriesError;
 
   if (isLoading) {
     return (
       <div className="mt-6 flex w-full max-w-5xl flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Penginapan</h2>
+          <h2 className="text-2xl font-bold">Spill Link</h2>
           <Button size="lg" disabled className="opacity-50">
             + Tambah
           </Button>
@@ -86,8 +86,8 @@ export function AccomodationList() {
   return (
     <div className="mt-6 flex w-full max-w-5xl flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Penginapan</h2>
-        <Link to="/admin/penginapan/create">
+        <h2 className="text-2xl font-bold">Spill Link</h2>
+        <Link to="/admin/spill-link/create">
           <Button size="lg">
             + Tambah
           </Button>
@@ -126,16 +126,16 @@ export function AccomodationList() {
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredAccomodations?.length === 0 ? (
+          {filteredSpills?.length === 0 ? (
             <div className="col-span-full flex min-h-[50vh] items-center justify-center">
               <p className="text-gray-500 text-center text-lg">Tidak ada data ditemukan, buat minimal 1 Bella!</p>
             </div>
           ) : (
-            filteredAccomodations?.map((item) => (
+            filteredSpills?.map((item) => (
               <Card key={item.id} className="flex flex-col">
                 <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 gap-4">
                   <div className="flex flex-col gap-1.5 overflow-hidden">
-                    <CardTitle className="truncate" title={item.nama_penginapan}>{item.nama_penginapan}</CardTitle>
+                    <CardTitle className="truncate" title={item.nama_item}>{item.nama_item}</CardTitle>
                     <CardDescription className="line-clamp-2">{item.description}</CardDescription>
                   </div>
                   <Button
@@ -149,9 +149,6 @@ export function AccomodationList() {
                   </Button>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-2">
-                  {item.location && (
-                    <p className="text-foreground text-sm font-medium">📍 {item.location}</p>
-                  )}
 
                 </CardContent>
                 <CardFooter className="mt-auto flex justify-between gap-2 pt-4">
@@ -160,10 +157,10 @@ export function AccomodationList() {
                       <DialogTrigger render={<Button className="bg-[#1b3b2c] text-white hover:bg-[#1b3b2c]/90 shadow-sm">Lihat Foto</Button>} />
                       <DialogContent className="max-w-xl p-6">
                         <DialogHeader>
-                          <DialogTitle>Preview: {item.nama_penginapan}</DialogTitle>
+                          <DialogTitle>Preview: {item.nama_item}</DialogTitle>
                         </DialogHeader>
                         <div className="flex w-full items-center justify-center overflow-hidden rounded-md bg-gray-100 mt-4">
-                          <img src={item.image_url} alt={item.nama_penginapan} className="w-full max-h-[70vh] object-contain" />
+                          <img src={item.image_url} alt={item.nama_item} className="w-full max-h-[70vh] object-contain" />
                         </div>
                       </DialogContent>
                     </Dialog>
@@ -171,12 +168,12 @@ export function AccomodationList() {
                     <Button variant="ghost" disabled>No Image</Button>
                   )}
                   <div className="flex gap-2">
-                    <Link to="/admin/penginapan/$id/edit" params={{ id: item.id }}>
+                    <Link to="/admin/spill-link/$id/edit" params={{ id: item.id }}>
                       <Button variant="outline">
                         Edit
                       </Button>
                     </Link>
-                    {accomodations && accomodations.length > 1 && (
+                    {spills && spills.length > 1 && (
                       <AlertDialog>
                         <AlertDialogTrigger 
                           render={

@@ -7,32 +7,32 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Textarea } from '@/components/ui/textarea';
 import { useForm } from '@tanstack/react-form';
 import imageCompression from 'browser-image-compression';
-import { CheckCircle2, ChevronDown, Loader2 } from 'lucide-react';
+import { ChevronDown, Loader2, CheckCircle2 } from 'lucide-react';
 import { useState } from 'react';
 import { CategoryFormDialog } from '../../category/components/CategoryFormDialog.tsx';
 import { useCategories } from '../../category/hooks/useCategory.ts';
-import { useCreateAccomodation, useUpdateAccomodation, useUploadAccomodationImage } from '../hooks/useAccomodation.ts';
-import { accomodationSchema } from '../schemas/accomodationSchema.ts';
-import { accomodationService } from '../services/accomodationService.ts';
-import type { Accomodation, CreateAccomodationPayload } from '../types/accomodation.types.ts';
+import { useCreateSpill, useUpdateSpill, useUploadSpillImage } from '../hooks/useSpill.ts';
+import { spillSchema } from '../schemas/spillSchema.ts';
+import { spillService } from '../services/spillService.ts';
+import type { Spill, CreateSpillPayload } from '../types/spill.types.ts';
 
-interface AccomodationFormProps {
-  initialData?: Accomodation;
+interface SpillFormProps {
+  initialData?: Spill;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-export function AccomodationForm({ initialData, onSuccess, onCancel }: AccomodationFormProps) {
-  const createMutation = useCreateAccomodation();
-  const updateMutation = useUpdateAccomodation();
-  const uploadMutation = useUploadAccomodationImage();
+export function SpillForm({ initialData, onSuccess, onCancel }: SpillFormProps) {
+  const createMutation = useCreateSpill();
+  const updateMutation = useUpdateSpill();
+  const uploadMutation = useUploadSpillImage();
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageError, setImageError] = useState('');
   const [isCompressing, setIsCompressing] = useState(false);
   const [isCompressed, setIsCompressed] = useState(false);
 
-  const { data: categories = [], isLoading: isLoadingCategories } = useCategories('accomodation');
+  const { data: categories = [], isLoading: isLoadingCategories } = useCategories('spill');
   const [openCategory, setOpenCategory] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>(initialData?.category_id || "");
   const [categoryError, setCategoryError] = useState('');
@@ -43,15 +43,14 @@ export function AccomodationForm({ initialData, onSuccess, onCancel }: Accomodat
 
   const form = useForm({
     defaultValues: {
-      nama_penginapan: initialData?.nama_penginapan || '',
+      nama_item: initialData?.nama_item || '',
       description: initialData?.description || '',
       room_tour_url: initialData?.room_tour_url || '',
       detail_url: initialData?.detail_url || '',
-      location: initialData?.location || '',
       image_url: initialData?.image_url || '',
       category_id: initialData?.category_id || '',
     },
-    validators: { onChange: accomodationSchema },
+    validators: { onChange: spillSchema },
     onSubmit: async ({ value }) => {
       if (!initialData?.image_url && !imageFile) {
         setImageError('Mohon pastikan form ini terisi');
@@ -69,13 +68,13 @@ export function AccomodationForm({ initialData, onSuccess, onCancel }: Accomodat
         if (imageFile) {
           imageUrl = await uploadMutation.mutateAsync(imageFile);
           
-          // Delete old image if we are updating an existing accommodation
+          // Delete old image if we are updating an existing spill
           if (initialData?.image_url) {
-            await accomodationService.deleteImage(initialData.image_url);
+            await spillService.deleteImage(initialData.image_url);
           }
         }
 
-        const payload: CreateAccomodationPayload = {
+        const payload: CreateSpillPayload = {
           ...value,
           image_url: imageUrl,
           category_id: selectedCategory || undefined,
@@ -88,8 +87,9 @@ export function AccomodationForm({ initialData, onSuccess, onCancel }: Accomodat
         }
 
         if (onSuccess) onSuccess();
-      } catch (error) {
+      } catch (error: any) {
         console.error('Submission failed', error);
+        alert(`Gagal menyimpan data: ${error.message}`);
       }
     },
   });
@@ -104,14 +104,14 @@ export function AccomodationForm({ initialData, onSuccess, onCancel }: Accomodat
         }}
       >
         <CardContent className="pb-8 flex flex-col gap-4">
-          <form.Field name="nama_penginapan">
+          <form.Field name="nama_item">
             {(field) => (
               <div className="flex flex-col gap-1">
-                <label className="font-semibold text-sm">Nama Penginapan <span className="text-red-500">*</span></label>
+                <label className="font-semibold text-sm">Nama Item <span className="text-red-500">*</span></label>
                 <Input
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="Cx. Deluxe Room"
+                  placeholder="e.g. Sepatu Sneakers"
                   className={field.state.meta.errors?.length ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
                 {field.state.meta.errors?.length ? <em className="text-red-500 text-sm">{field.state.meta.errors.map((e: any) => e.message || e).join(', ')}</em> : null}
@@ -126,33 +126,18 @@ export function AccomodationForm({ initialData, onSuccess, onCancel }: Accomodat
                 <Textarea
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="Room description..."
+                  placeholder="Deskripsi item..."
                   rows={3}
                 />
               </div>
             )}
           </form.Field>
 
-          <form.Field name="location">
-            {(field) => (
-              <div className="flex flex-col gap-1">
-                <label className="font-semibold text-sm">Lokasi <span className="text-red-500">*</span></label>
-                <Input
-                  type="text"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="Cx. Mantrijeron, Yogyakarta"
-                  className={field.state.meta.errors?.length ? "border-red-500 focus-visible:ring-red-500" : ""}
-                />
-                {field.state.meta.errors?.length ? <em className="text-red-500 text-sm">{field.state.meta.errors.map((e: any) => e.message || e).join(', ')}</em> : null}
-              </div>
-            )}
-          </form.Field>
 
           <form.Field name="room_tour_url">
             {(field) => (
               <div className="flex flex-col gap-1">
-                <label className="font-semibold text-sm">Room Tour URL (Opsional)</label>
+                <label className="font-semibold text-sm">Review URL (Opsional)</label>
                 <Input
                   type="url"
                   value={field.state.value}
@@ -343,7 +328,7 @@ export function AccomodationForm({ initialData, onSuccess, onCancel }: Accomodat
         </CardFooter>
       </form>
       <CategoryFormDialog 
-        type="accomodation"
+        type="spill"
         open={isCategoryFormOpen} 
         onOpenChange={setIsCategoryFormOpen}
         onSuccess={() => {

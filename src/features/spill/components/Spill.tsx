@@ -2,33 +2,33 @@ import { Footer, SearchAutocomplete } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MapPin, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { useState } from 'react';
 import { useCategories } from '../../category/hooks/useCategory.ts';
-import { useAccomodations } from '../hooks/useAccomodation.ts';
+import { useSpills } from '../hooks/useSpill.ts';
 
-export function Accomodation() {
-  const { data: categories, isLoading: isCatLoading, isError: isCatError } = useCategories('accomodation');
-  const { data: accomodations, isLoading: isAccLoading, isError: isAccError } = useAccomodations();
+export function Spill() {
+  const { data: categories, isLoading: isCatLoading, isError: isCatError } = useCategories('spill');
+  const { data: spills, isLoading: isSpillsLoading, isError: isSpillsError } = useSpills();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedSearchItem, setSelectedSearchItem] = useState<{ id: string } | null>(null);
 
-  const isLoading = isCatLoading || isAccLoading;
-  const isError = isCatError || isAccError;
+  const isLoading = isCatLoading || isSpillsLoading;
+  const isError = isCatError || isSpillsError;
 
-  const hasFavourites = accomodations?.some(a => a.is_favourite);
-  const activeCategoryIds = new Set(accomodations?.map(a => a.category_id).filter(Boolean));
+  const hasFavourites = spills?.some(a => a.is_favourite);
+  const activeCategoryIds = new Set(spills?.map(a => a.category_id).filter(Boolean));
   const activeCategories = categories?.filter((category) => activeCategoryIds.has(category.id)) || [];
 
-  const filteredAccomodations = selectedCategoryId === 'favourite'
-    ? accomodations?.filter(a => a.is_favourite)
+  const filteredSpills = selectedCategoryId === 'favourite'
+    ? spills?.filter(a => a.is_favourite)
     : selectedCategoryId 
-      ? accomodations?.filter(a => a.category_id === selectedCategoryId)
-      : accomodations;
+      ? spills?.filter(a => a.category_id === selectedCategoryId)
+      : spills;
 
-  const displayAccomodations = selectedSearchItem 
-    ? accomodations?.filter(a => a.id === selectedSearchItem.id) 
-    : filteredAccomodations;
+  const displaySpills = selectedSearchItem 
+    ? spills?.filter(a => a.id === selectedSearchItem.id) 
+    : filteredSpills;
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 font-sans">
@@ -38,9 +38,7 @@ export function Accomodation() {
             className="mb-3 font-bold font-serif text-4xl text-[#1b3b2c] italic md:text-5xl"
             style={{ fontFamily: '"Playfair Display", "Times New Roman", serif' }}
           >
-            Rekomendasi Villa
-            <br />
-            dan Hotel
+            Rekomendasi <br /> Barang
           </h1>
           <p className="mt-2 font-semibold text-[#1b3b2c] text-sm md:text-base">
             by Bella Rhema Agnesia
@@ -49,8 +47,8 @@ export function Accomodation() {
 
         <div className="px-5 mb-8 flex justify-center">
           <SearchAutocomplete
-            placeholder="Cari nama villa atau hotel..."
-            items={accomodations?.map(a => ({ id: a.id, title: a.nama_penginapan, is_favourite: a.is_favourite })) || []}
+            placeholder="Cari nama barang..."
+            items={spills?.map(a => ({ id: a.id, title: a.nama_item, is_favourite: a.is_favourite })) || []}
             className="w-full max-w-[340px]"
             onSelect={(item) => setSelectedSearchItem(item)}
             onClear={() => setSelectedSearchItem(null)}
@@ -91,10 +89,10 @@ export function Accomodation() {
           )}
 
           {isLoading ? (
-            <div className="mb-10 grid grid-cols-1 gap-6 sm:grid-cols-2">
-              {[1, 2, 3, 4].map((i) => (
+            <div className="mb-10 grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
                 <Card key={i} className="overflow-hidden rounded-[20px] border-slate-100 p-0 shadow-sm">
-                  <Skeleton className="h-48 w-full rounded-none" />
+                  <Skeleton className="h-56 w-full rounded-none" />
                   <CardContent className="p-5">
                     <Skeleton className="h-6 w-3/4 mb-4" />
                     <Skeleton className="h-4 w-full mb-4" />
@@ -108,25 +106,25 @@ export function Accomodation() {
             </div>
           ) : isError ? (
             <div className="flex flex-col items-center justify-center py-10">
-              <p className="text-red-500">Gagal memuat data penginapan.</p>
+              <p className="text-red-500">Gagal memuat data spill link.</p>
             </div>
-          ) : displayAccomodations && displayAccomodations.length === 0 ? (
+          ) : displaySpills && displaySpills.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10">
-              <p className="text-slate-500">Belum ada penginapan di kategori ini.</p>
+              <p className="text-slate-500">Belum ada item di kategori ini.</p>
             </div>
           ) : (
-            <div className={`mb-10 grid grid-cols-1 gap-6 ${selectedSearchItem ? 'max-w-md mx-auto' : 'sm:grid-cols-2'}`}>
-              {displayAccomodations?.map((item) => (
+            <div className={`mb-10 grid grid-cols-2 gap-4 sm:grid-cols-3 ${selectedSearchItem ? 'max-w-md mx-auto' : ''}`}>
+              {displaySpills?.map((item) => (
                 <Card
                   key={item.id}
                   className="overflow-hidden rounded-[20px] border-slate-100 p-0 gap-0 shadow-sm transition-transform hover:scale-[1.01]"
                 >
                   {/* Card Image */}
-                  <div className="relative h-48 w-full overflow-hidden bg-slate-200">
+                  <div className="relative h-56 w-full overflow-hidden bg-slate-200">
                     {item.image_url ? (
                       <img
                         src={item.image_url}
-                        alt={item.nama_penginapan}
+                        alt={item.nama_item}
                         className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
                       />
                     ) : (
@@ -142,22 +140,15 @@ export function Accomodation() {
                   </div>
 
                   {/* Card Body */}
-                  <CardContent className="p-5 flex flex-col h-[calc(100%-12rem)]">
-                    <h3 className="mb-1.5 font-extrabold text-[#1A3B2B] text-[22px] leading-tight">{item.nama_penginapan}</h3>
+                  <CardContent className="p-4 flex flex-col h-[calc(100%-14rem)]">
+                    <h3 className="mb-1.5 font-extrabold text-[#1A3B2B] text-lg leading-tight line-clamp-2">{item.nama_item}</h3>
                     {item.description ? (
-                      <p className="mb-5 font-serif text-[14px] italic text-[#1A3B2B]/70">"{item.description}"</p>
+                      <p className="mb-5 font-serif text-[13px] italic text-[#1A3B2B]/70 line-clamp-2">"{item.description}"</p>
                     ) : (
                       <div className="mb-5" />
                     )}
 
                     <div className="mt-auto">
-                      {item.location && (
-                        <div className="mb-5 flex items-center text-slate-500">
-                          <MapPin className="mr-2 h-4 w-4 shrink-0" />
-                          <span className="text-[13px] font-medium text-slate-600">{item.location}</span>
-                        </div>
-                      )}
-
                       <div className="flex w-full items-center gap-2">
                         <a href={item.detail_url} target="_blank" rel="noopener noreferrer" className="w-full block">
                           <Button className="h-auto w-full rounded-lg border border-[#1A3B2B] bg-transparent py-2.5 text-[13px] font-medium text-[#1A3B2B] shadow-none transition-colors hover:bg-[#1A3B2B]/5">

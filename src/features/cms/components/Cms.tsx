@@ -24,7 +24,10 @@ export function Cms() {
   const isHome = location.pathname === '/admin' || location.pathname === '/admin/';
 
   const handleBack = () => {
-    if (location.pathname === '/admin/penginapan' || location.pathname === '/admin/penginapan/') {
+    if (
+      location.pathname === '/admin/penginapan' || location.pathname === '/admin/penginapan/' ||
+      location.pathname === '/admin/spill-link' || location.pathname === '/admin/spill-link/'
+    ) {
       navigate({ to: '/admin' });
     } else {
       router.history.back();
