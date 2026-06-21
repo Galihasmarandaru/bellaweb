@@ -289,13 +289,14 @@ export function SpillForm({ initialData, onSuccess, onCancel }: SpillFormProps) 
           </div>
         </CardContent>
 
-        <CardFooter className="flex justify-end gap-3 pb-8 px-6 pt-2">
+        <CardFooter className="flex flex-col-reverse sm:flex-row justify-end gap-3 pb-8 px-6 pt-2">
           {onCancel && (
             <Button 
               type="button" 
               variant="outline" 
               onClick={onCancel}
               disabled={isSaving || isCompressing || isLoadingCategories}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>

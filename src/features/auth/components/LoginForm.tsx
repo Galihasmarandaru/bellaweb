@@ -49,7 +49,7 @@ export function LoginForm() {
                   className={field.state.meta.errors?.length ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
                 {field.state.meta.errors?.length ? (
-                  <em className="text-red-500 text-sm">{field.state.meta.errors.join(', ')}</em>
+                  <em className="text-red-500 text-sm">{field.state.meta.errors.map((e: any) => e.message || e).join(', ')}</em>
                 ) : null}
               </div>
             )}
@@ -67,7 +67,7 @@ export function LoginForm() {
                   className={field.state.meta.errors?.length ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
                 {field.state.meta.errors?.length ? (
-                  <em className="text-red-500 text-sm">{field.state.meta.errors.join(', ')}</em>
+                  <em className="text-red-500 text-sm">{field.state.meta.errors.map((e: any) => e.message || e).join(', ')}</em>
                 ) : null}
               </div>
             )}

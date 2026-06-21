@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Link, Outlet, useLocation, useNavigate, useRouter } from '@tanstack/react-router';
+import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { authService } from '../../auth/services/authService.ts';
 import { setUser } from '../../auth/stores/authStore.ts';
@@ -20,6 +21,7 @@ export function Cms() {
   const router = useRouter();
   const location = useLocation();
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const isHome = location.pathname === '/admin' || location.pathname === '/admin/';
 
@@ -34,13 +36,16 @@ export function Cms() {
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setIsLoggingOut(true);
     try {
       await authService.logout();
       setUser(null);
       navigate({ to: '/login' });
     } catch (error) {
       console.error('Logout failed:', error);
+      setIsLoggingOut(false);
     }
   };
 
@@ -105,9 +110,12 @@ export function Cms() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Yakin mau logout Bella?</AlertDialogTitle>
               </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel variant="outline" size="default">No</AlertDialogCancel>
-                <AlertDialogAction onClick={handleLogout} className="bg-red-600 text-white hover:bg-red-700">Yes</AlertDialogAction>
+              <AlertDialogFooter className="flex-col gap-2 sm:flex-col sm:space-x-0">
+                <AlertDialogAction disabled={isLoggingOut} onClick={handleLogout} className="w-full bg-red-600 text-white hover:bg-red-700">
+                  {isLoggingOut ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Yes
+                </AlertDialogAction>
+                <AlertDialogCancel disabled={isLoggingOut} className="w-full mt-0" variant="outline" size="default">No</AlertDialogCancel>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
