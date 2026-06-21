@@ -17,11 +17,7 @@ export const accomodationService = {
   },
 
   getAccomodationById: async (id: string): Promise<Accomodation> => {
-    const { data, error } = await supabase
-      .from('accomodations')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { data, error } = await supabase.from('accomodations').select('*').eq('id', id).single();
 
     if (error) throw new Error(error.message);
     return data;
@@ -38,7 +34,10 @@ export const accomodationService = {
     return data;
   },
 
-  updateAccomodation: async (id: string, payload: UpdateAccomodationPayload): Promise<Accomodation> => {
+  updateAccomodation: async (
+    id: string,
+    payload: UpdateAccomodationPayload,
+  ): Promise<Accomodation> => {
     const { data, error } = await supabase
       .from('accomodations')
       .update(payload)

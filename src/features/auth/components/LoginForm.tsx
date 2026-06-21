@@ -1,9 +1,16 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { useForm } from '@tanstack/react-form';
 import { useNavigate } from '@tanstack/react-router';
 import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { useLogin } from '../hooks/useLogin.ts';
 import { loginSchema } from '../schemas/authSchema.ts';
 import { setUser } from '../stores/authStore.ts';
@@ -30,7 +37,7 @@ export function LoginForm() {
           form.handleSubmit();
         }}
       >
-        <CardHeader className='pb-8'>
+        <CardHeader className="pb-8">
           <CardTitle className="text-2xl text-center font-bold text-[#1b3b2c]">Login</CardTitle>
           <CardDescription className="text-center pt-1">
             Silakan masuk untuk mengakses sistem
@@ -46,10 +53,16 @@ export function LoginForm() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   placeholder="Masukkan username"
-                  className={field.state.meta.errors?.length ? "border-red-500 focus-visible:ring-red-500" : ""}
+                  className={
+                    field.state.meta.errors?.length
+                      ? 'border-red-500 focus-visible:ring-red-500'
+                      : ''
+                  }
                 />
                 {field.state.meta.errors?.length ? (
-                  <em className="text-red-500 text-sm">{field.state.meta.errors.map((e: any) => e.message || e).join(', ')}</em>
+                  <em className="text-red-500 text-sm">
+                    {field.state.meta.errors.map((e: any) => e.message || e).join(', ')}
+                  </em>
                 ) : null}
               </div>
             )}
@@ -64,16 +77,22 @@ export function LoginForm() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   placeholder="Masukkan password"
-                  className={field.state.meta.errors?.length ? "border-red-500 focus-visible:ring-red-500" : ""}
+                  className={
+                    field.state.meta.errors?.length
+                      ? 'border-red-500 focus-visible:ring-red-500'
+                      : ''
+                  }
                 />
                 {field.state.meta.errors?.length ? (
-                  <em className="text-red-500 text-sm">{field.state.meta.errors.map((e: any) => e.message || e).join(', ')}</em>
+                  <em className="text-red-500 text-sm">
+                    {field.state.meta.errors.map((e: any) => e.message || e).join(', ')}
+                  </em>
                 ) : null}
               </div>
             )}
           </form.Field>
         </CardContent>
-        <CardFooter className='bg-transparent border-t-0 py-12'>
+        <CardFooter className="bg-transparent border-t-0 py-12">
           <Button
             type="submit"
             className="w-full bg-[#1b3b2c] text-white hover:bg-[#1b3b2c]/90"

@@ -1,7 +1,7 @@
+import { useForm } from '@tanstack/react-form';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { useForm } from '@tanstack/react-form';
 import { useCreateCategory } from '../hooks/useCategory';
 import { categorySchema } from '../schemas/categorySchema';
 
@@ -12,7 +12,12 @@ interface CategoryFormDialogProps {
   type: 'accomodation' | 'spill';
 }
 
-export function CategoryFormDialog({ open, onOpenChange, onSuccess, type }: CategoryFormDialogProps) {
+export function CategoryFormDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+  type,
+}: CategoryFormDialogProps) {
   const createMutation = useCreateCategory();
 
   const form = useForm({
@@ -57,7 +62,9 @@ export function CategoryFormDialog({ open, onOpenChange, onSuccess, type }: Cate
                   autoFocus
                 />
                 {field.state.meta.errors ? (
-                  <em className="text-sm text-red-500">{field.state.meta.errors.map((e: any) => e.message || e).join(', ')}</em>
+                  <em className="text-sm text-red-500">
+                    {field.state.meta.errors.map((e: any) => e.message || e).join(', ')}
+                  </em>
                 ) : null}
               </div>
             )}

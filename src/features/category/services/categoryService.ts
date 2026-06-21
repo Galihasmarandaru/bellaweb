@@ -3,7 +3,7 @@ import type { Category, CreateCategoryPayload } from '../types/category.types';
 
 export const getCategories = async (type?: 'accomodation' | 'spill'): Promise<Category[]> => {
   let query = supabase.from('categories').select('*');
-  
+
   if (type) {
     query = query.eq('type', type);
   }

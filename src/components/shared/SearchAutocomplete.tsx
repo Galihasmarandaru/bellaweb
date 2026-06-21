@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { FiSearch, FiX } from 'react-icons/fi';
 import {
   Command,
@@ -52,6 +52,9 @@ export function SearchAutocomplete({
           type="text"
           placeholder={placeholder}
           value={value}
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck="false"
           onChange={(e) => {
             setValue(e.target.value);
             setIsSelected(false);
@@ -63,7 +66,7 @@ export function SearchAutocomplete({
         />
         <div className="absolute top-1/2 right-4 -translate-y-1/2 text-gray-500">
           {isSelected ? (
-            <button 
+            <button
               type="button"
               className="flex items-center justify-center hover:text-gray-800"
               onClick={() => {
@@ -88,7 +91,7 @@ export function SearchAutocomplete({
             <Command shouldFilter={false}>
               <CommandList className="max-h-[300px]">
                 <CommandEmpty>Tidak ada hasil ditemukan.</CommandEmpty>
-                <CommandGroup heading={value.length > 0 ? "Hasil Pencarian" : "Saran Populer"}>
+                <CommandGroup heading={value.length > 0 ? 'Hasil Pencarian' : 'Saran Populer'}>
                   {filteredItems.map((item) => (
                     <CommandItem
                       key={item.id}

@@ -5,7 +5,7 @@ export const authService = {
   login: async (payload: LoginPayload): Promise<AuthResponse> => {
     // Note: Supabase uses email by default, we map username to email here
     let email = payload.username;
-    
+
     // Map specific username to real email
     if (email.toLowerCase() === 'babela') {
       email = 'gabelgood.2022@gmail.com';

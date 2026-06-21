@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { Cms } from '../features/cms';
 import { $isAuthenticated } from '../features/auth/stores/authStore.ts';
+import { Cms } from '../features/cms';
 
 export const Route = createFileRoute('/admin')({
   beforeLoad: () => {

@@ -1,6 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { accomodationService } from '../services/accomodationService.ts';
-import type { CreateAccomodationPayload, UpdateAccomodationPayload } from '../types/accomodation.types.ts';
+import type {
+  CreateAccomodationPayload,
+  UpdateAccomodationPayload,
+} from '../types/accomodation.types.ts';
 
 export const useAccomodations = () => {
   return useQuery({
@@ -21,7 +24,8 @@ export const useCreateAccomodation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreateAccomodationPayload) => accomodationService.createAccomodation(payload),
+    mutationFn: (payload: CreateAccomodationPayload) =>
+      accomodationService.createAccomodation(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accomodations'] });
     },

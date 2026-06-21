@@ -1,9 +1,5 @@
 import { supabase } from '../../../shared/lib/supabase.ts';
-import type {
-  Spill,
-  CreateSpillPayload,
-  UpdateSpillPayload,
-} from '../types/spill.types.ts';
+import type { CreateSpillPayload, Spill, UpdateSpillPayload } from '../types/spill.types.ts';
 
 export const spillService = {
   getSpills: async (): Promise<Spill[]> => {
@@ -17,22 +13,14 @@ export const spillService = {
   },
 
   getSpillById: async (id: string): Promise<Spill> => {
-    const { data, error } = await supabase
-      .from('spills')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { data, error } = await supabase.from('spills').select('*').eq('id', id).single();
 
     if (error) throw new Error(error.message);
     return data;
   },
 
   createSpill: async (payload: CreateSpillPayload): Promise<Spill> => {
-    const { data, error } = await supabase
-      .from('spills')
-      .insert([payload])
-      .select()
-      .single();
+    const { data, error } = await supabase.from('spills').insert([payload]).select().single();
 
     if (error) throw new Error(error.message);
     return data;
@@ -51,11 +39,7 @@ export const spillService = {
   },
 
   deleteSpill: async (id: string): Promise<void> => {
-    const { data: item } = await supabase
-      .from('spills')
-      .select('image_url')
-      .eq('id', id)
-      .single();
+    const { data: item } = await supabase.from('spills').select('image_url').eq('id', id).single();
 
     const { error } = await supabase.from('spills').delete().eq('id', id);
     if (error) throw new Error(error.message);

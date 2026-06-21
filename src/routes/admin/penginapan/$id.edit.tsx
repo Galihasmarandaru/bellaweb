@@ -27,7 +27,9 @@ function PenginapanEdit() {
     return (
       <div className="flex min-h-[50vh] w-full flex-1 flex-col items-center justify-center gap-4">
         <p className="text-lg text-red-500">Data penginapan tidak ditemukan.</p>
-        <button onClick={handleClose} className="text-blue-500 hover:underline">Kembali</button>
+        <button onClick={handleClose} className="text-blue-500 hover:underline">
+          Kembali
+        </button>
       </div>
     );
   }
