@@ -1,6 +1,6 @@
-import { Link } from '@tanstack/react-router';
 import { Footer } from '@/components/shared';
 import { Button } from '@/components/ui/button';
+import { Link } from '@tanstack/react-router';
 
 export function Dashboard() {
   return (
@@ -27,9 +27,7 @@ export function Dashboard() {
           className="mb-4 font-bold font-serif text-4xl text-[#1b3b2c] italic md:text-5xl"
           style={{ fontFamily: '"Playfair Display", "Times New Roman", serif' }}
         >
-          Rekomendasi Penginapan
-          <br />
-          dan Barang
+          Rekomendasi Penginapan & spall spill
         </h1>
         <p className="mt-2 font-semibold text-[#1b3b2c] text-sm md:text-base">
           by Bella Rhema Agnesia
