@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCategories } from '../../category/hooks/useCategory.ts';
+import type { Category } from '../../category/types/category.types';
 import { useSpills } from '../hooks/useSpill.ts';
+import type { Spill as SpillType } from '../types/spill.types.ts';
 
 export function Spill() {
   const { data: categories, isLoading: isCatLoading, isError: isCatError } = useCategories('spill');
@@ -17,20 +19,20 @@ export function Spill() {
   const isLoading = isCatLoading || isSpillsLoading;
   const isError = isCatError || isSpillsError;
 
-  const hasFavourites = spills?.some((a) => a.is_favourite);
-  const activeCategoryIds = new Set(spills?.map((a) => a.category_id).filter(Boolean));
+  const hasFavourites = spills?.some((a: SpillType) => a.is_favourite);
+  const activeCategoryIds = new Set(spills?.map((a: SpillType) => a.category_id).filter(Boolean));
   const activeCategories =
-    categories?.filter((category) => activeCategoryIds.has(category.id)) || [];
+    categories?.filter((category: Category) => activeCategoryIds.has(category.id)) || [];
 
   const filteredSpills =
     selectedCategoryId === 'favourite'
-      ? spills?.filter((a) => a.is_favourite)
+      ? spills?.filter((a: SpillType) => a.is_favourite)
       : selectedCategoryId
-        ? spills?.filter((a) => a.category_id === selectedCategoryId)
+        ? spills?.filter((a: SpillType) => a.category_id === selectedCategoryId)
         : spills;
 
   const displaySpills = selectedSearchItem
-    ? spills?.filter((a) => a.id === selectedSearchItem.id)
+    ? spills?.filter((a: SpillType) => a.id === selectedSearchItem.id)
     : filteredSpills;
 
   return (
@@ -69,7 +71,7 @@ export function Spill() {
           <SearchAutocomplete
             placeholder="Cari nama barang..."
             items={
-              spills?.map((a) => ({
+              spills?.map((a: SpillType) => ({
                 id: a.id,
                 title: a.nama_item,
                 is_favourite: a.is_favourite,
@@ -104,7 +106,7 @@ export function Spill() {
                   Favourite
                 </Button>
               )}
-              {activeCategories.map((category) => (
+              {activeCategories.map((category: Category) => (
                 <Button
                   key={category.id}
                   variant={selectedCategoryId === category.id ? 'default' : 'outline'}
@@ -148,7 +150,7 @@ export function Spill() {
             <div
               className={`mb-10 grid grid-cols-2 gap-4 sm:grid-cols-3 ${selectedSearchItem ? 'max-w-md mx-auto' : ''}`}
             >
-              {displaySpills?.map((item) => (
+              {displaySpills?.map((item: SpillType) => (
                 <Card
                   key={item.id}
                   className="overflow-hidden rounded-[20px] border-slate-100 p-0 gap-0 shadow-sm transition-transform hover:scale-[1.01]"

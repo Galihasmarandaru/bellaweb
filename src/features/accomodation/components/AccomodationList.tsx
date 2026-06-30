@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { Heart } from 'lucide-react';
+import { Heart, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import {
   AlertDialog,
@@ -29,11 +29,13 @@ import {
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCategories } from '../../category/hooks/useCategory.ts';
+import type { Category } from '../../category/types/category.types';
 import {
   useAccomodations,
   useDeleteAccomodation,
   useUpdateAccomodation,
 } from '../hooks/useAccomodation.ts';
+import type { Accomodation as AccomodationType } from '../types/accomodation.types';
 
 export function AccomodationList() {
   const {
@@ -50,15 +52,18 @@ export function AccomodationList() {
   const updateMutation = useUpdateAccomodation();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-  const hasFavourites = accomodations?.some((a) => a.is_favourite);
-  const activeCategoryIds = new Set(accomodations?.map((a) => a.category_id).filter(Boolean));
-  const activeCategories = categories?.filter((c) => activeCategoryIds.has(c.id)) || [];
+  const hasFavourites = accomodations?.some((a: AccomodationType) => a.is_favourite);
+  const activeCategoryIds = new Set(
+    accomodations?.map((a: AccomodationType) => a.category_id).filter(Boolean),
+  );
+  const activeCategories =
+    categories?.filter((category: Category) => activeCategoryIds.has(category.id)) || [];
 
   const filteredAccomodations =
     selectedCategoryId === 'favourite'
-      ? accomodations?.filter((a) => a.is_favourite)
+      ? accomodations?.filter((a: AccomodationType) => a.is_favourite)
       : selectedCategoryId
-        ? accomodations?.filter((a) => a.category_id === selectedCategoryId)
+        ? accomodations?.filter((a: AccomodationType) => a.category_id === selectedCategoryId)
         : accomodations;
 
   const isLoading = isAccomodationsLoading || isCategoriesLoading;
@@ -139,7 +144,7 @@ export function AccomodationList() {
               Favourite
             </Button>
           )}
-          {activeCategories.map((category) => (
+          {activeCategories.map((category: Category) => (
             <Button
               key={category.id}
               variant={selectedCategoryId === category.id ? 'default' : 'outline'}
@@ -160,7 +165,7 @@ export function AccomodationList() {
             </p>
           </div>
         ) : (
-          filteredAccomodations?.map((item) => (
+          filteredAccomodations?.map((item: AccomodationType) => (
             <Card key={item.id} className="flex flex-col">
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 gap-4">
                 <div className="flex flex-col gap-1.5 overflow-hidden">
@@ -237,14 +242,29 @@ export function AccomodationList() {
                           <AlertDialogTitle>Yakin data ini mau dihapus?</AlertDialogTitle>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel variant="outline" size="default">
+                          <AlertDialogCancel
+                            variant="outline"
+                            size="default"
+                            disabled={deleteMutation.isPending}
+                          >
                             No
                           </AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => deleteMutation.mutate(item.id)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              deleteMutation.mutate(item.id);
+                            }}
                             className="bg-red-600 text-white hover:bg-red-700"
+                            disabled={deleteMutation.isPending}
                           >
-                            Yes
+                            {deleteMutation.isPending && deleteMutation.variables === item.id ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ...menghapus
+                              </>
+                            ) : (
+                              'Yes'
+                            )}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>

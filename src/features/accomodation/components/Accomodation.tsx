@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCategories } from '../../category/hooks/useCategory.ts';
+import type { Category } from '../../category/types/category.types';
 import { useAccomodations } from '../hooks/useAccomodation.ts';
+import type { Accomodation as AccomodationType } from '../types/accomodation.types';
 
 export function Accomodation() {
   const {
@@ -21,20 +23,22 @@ export function Accomodation() {
   const isLoading = isCatLoading || isAccLoading;
   const isError = isCatError || isAccError;
 
-  const hasFavourites = accomodations?.some((a) => a.is_favourite);
-  const activeCategoryIds = new Set(accomodations?.map((a) => a.category_id).filter(Boolean));
+  const hasFavourites = accomodations?.some((a: AccomodationType) => a.is_favourite);
+  const activeCategoryIds = new Set(
+    accomodations?.map((a: AccomodationType) => a.category_id).filter(Boolean),
+  );
   const activeCategories =
-    categories?.filter((category) => activeCategoryIds.has(category.id)) || [];
+    categories?.filter((category: Category) => activeCategoryIds.has(category.id)) || [];
 
   const filteredAccomodations =
     selectedCategoryId === 'favourite'
-      ? accomodations?.filter((a) => a.is_favourite)
+      ? accomodations?.filter((a: AccomodationType) => a.is_favourite)
       : selectedCategoryId
-        ? accomodations?.filter((a) => a.category_id === selectedCategoryId)
+        ? accomodations?.filter((a: AccomodationType) => a.category_id === selectedCategoryId)
         : accomodations;
 
   const displayAccomodations = selectedSearchItem
-    ? accomodations?.filter((a) => a.id === selectedSearchItem.id)
+    ? accomodations?.filter((a: AccomodationType) => a.id === selectedSearchItem.id)
     : filteredAccomodations;
 
   return (
@@ -73,7 +77,7 @@ export function Accomodation() {
           <SearchAutocomplete
             placeholder="Cari nama villa atau hotel..."
             items={
-              accomodations?.map((a) => ({
+              accomodations?.map((a: AccomodationType) => ({
                 id: a.id,
                 title: a.nama_penginapan,
                 is_favourite: a.is_favourite,
@@ -108,7 +112,7 @@ export function Accomodation() {
                   Favourite
                 </Button>
               )}
-              {activeCategories.map((category) => (
+              {activeCategories.map((category: Category) => (
                 <Button
                   key={category.id}
                   variant={selectedCategoryId === category.id ? 'default' : 'outline'}
@@ -152,7 +156,7 @@ export function Accomodation() {
             <div
               className={`mb-10 grid grid-cols-1 gap-6 ${selectedSearchItem ? 'max-w-md mx-auto' : 'sm:grid-cols-2'}`}
             >
-              {displayAccomodations?.map((item) => (
+              {displayAccomodations?.map((item: AccomodationType) => (
                 <Card
                   key={item.id}
                   className="overflow-hidden rounded-[20px] border-slate-100 p-0 gap-0 shadow-sm transition-transform hover:scale-[1.01]"

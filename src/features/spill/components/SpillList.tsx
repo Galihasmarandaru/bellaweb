@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { Heart } from 'lucide-react';
+import { Heart, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import {
   AlertDialog,
@@ -29,7 +29,9 @@ import {
 } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCategories } from '../../category/hooks/useCategory.ts';
+import type { Category } from '../../category/types/category.types';
 import { useDeleteSpill, useSpills, useUpdateSpill } from '../hooks/useSpill.ts';
+import type { Spill as SpillType } from '../types/spill.types.ts';
 
 export function SpillList() {
   const { data: spills, isLoading: isSpillsLoading, isError: isSpillsError } = useSpills();
@@ -42,15 +44,15 @@ export function SpillList() {
   const updateMutation = useUpdateSpill();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-  const hasFavourites = spills?.some((a) => a.is_favourite);
-  const activeCategoryIds = new Set(spills?.map((a) => a.category_id).filter(Boolean));
-  const activeCategories = categories?.filter((c) => activeCategoryIds.has(c.id)) || [];
+  const hasFavourites = spills?.some((a: SpillType) => a.is_favourite);
+  const activeCategoryIds = new Set(spills?.map((a: SpillType) => a.category_id).filter(Boolean));
+  const activeCategories = categories?.filter((c: Category) => activeCategoryIds.has(c.id)) || [];
 
   const filteredSpills =
     selectedCategoryId === 'favourite'
-      ? spills?.filter((a) => a.is_favourite)
+      ? spills?.filter((a: SpillType) => a.is_favourite)
       : selectedCategoryId
-        ? spills?.filter((a) => a.category_id === selectedCategoryId)
+        ? spills?.filter((a: SpillType) => a.category_id === selectedCategoryId)
         : spills;
 
   const isLoading = isSpillsLoading || isCategoriesLoading;
@@ -131,7 +133,7 @@ export function SpillList() {
               Favourite
             </Button>
           )}
-          {activeCategories.map((category) => (
+          {activeCategories.map((category: Category) => (
             <Button
               key={category.id}
               variant={selectedCategoryId === category.id ? 'default' : 'outline'}
@@ -152,7 +154,7 @@ export function SpillList() {
             </p>
           </div>
         ) : (
-          filteredSpills?.map((item) => (
+          filteredSpills?.map((item: SpillType) => (
             <Card key={item.id} className="flex flex-col">
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 gap-4">
                 <div className="flex flex-col gap-1.5 overflow-hidden">
@@ -225,14 +227,29 @@ export function SpillList() {
                           <AlertDialogTitle>Yakin data ini mau dihapus?</AlertDialogTitle>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel variant="outline" size="default">
+                          <AlertDialogCancel
+                            variant="outline"
+                            size="default"
+                            disabled={deleteMutation.isPending}
+                          >
                             No
                           </AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => deleteMutation.mutate(item.id)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              deleteMutation.mutate(item.id);
+                            }}
                             className="bg-red-600 text-white hover:bg-red-700"
+                            disabled={deleteMutation.isPending}
                           >
-                            Yes
+                            {deleteMutation.isPending && deleteMutation.variables === item.id ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ...menghapus
+                              </>
+                            ) : (
+                              'Yes'
+                            )}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>

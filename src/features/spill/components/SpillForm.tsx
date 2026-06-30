@@ -25,6 +25,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Textarea } from '@/components/ui/textarea';
 import { CategoryFormDialog } from '../../category/components/CategoryFormDialog.tsx';
 import { useCategories } from '../../category/hooks/useCategory.ts';
+import type { Category } from '../../category/types/category.types';
 import { useCreateSpill, useUpdateSpill, useUploadSpillImage } from '../hooks/useSpill.ts';
 import { spillSchema } from '../schemas/spillSchema.ts';
 import { spillService } from '../services/spillService.ts';
@@ -52,7 +53,8 @@ export function SpillForm({ initialData, onSuccess, onCancel }: SpillFormProps) 
   const [categoryError, setCategoryError] = useState('');
   const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false);
 
-  const selectedCategoryName = categories.find((c) => c.id === selectedCategory)?.name || '';
+  const selectedCategoryName =
+    categories.find((c: Category) => c.id === selectedCategory)?.name || '';
   const isSaving = createMutation.isPending || updateMutation.isPending || uploadMutation.isPending;
 
   const form = useForm({
@@ -306,7 +308,7 @@ export function SpillForm({ initialData, onSuccess, onCancel }: SpillFormProps) 
                   <CommandList>
                     <CommandEmpty>Kategori tidak ditemukan.</CommandEmpty>
                     <CommandGroup>
-                      {categories.map((category) => (
+                      {categories.map((category: Category) => (
                         <CommandItem
                           key={category.id}
                           value={category.name}

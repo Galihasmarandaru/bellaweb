@@ -1,6 +1,6 @@
+import { Link } from '@tanstack/react-router';
 import { Footer } from '@/components/shared';
 import { Button } from '@/components/ui/button';
-import { Link } from '@tanstack/react-router';
 
 export function Dashboard() {
   return (
