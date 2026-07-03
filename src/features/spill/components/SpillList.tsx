@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { Heart, Loader2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
