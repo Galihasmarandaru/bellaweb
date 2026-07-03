@@ -220,14 +220,14 @@ export function SpillForm({ initialData, onSuccess, onCancel }: SpillFormProps) 
                   if (e.target.files && e.target.files[0]) {
                     let file = e.target.files[0];
 
-                    // Compress if file is larger than 400KB
-                    if (file.size > 400 * 1024) {
+                    // Compress if file is larger than 100KB
+                    if (file.size > 100 * 1024) {
                       try {
                         setIsCompressing(true);
                         setIsCompressed(false);
                         const options = {
-                          maxSizeMB: 0.4, // 400KB
-                          maxWidthOrHeight: 1920,
+                          maxSizeMB: 0.1, // 100KB
+                          maxWidthOrHeight: 1024,
                           useWebWorker: true,
                         };
                         file = await imageCompression(file, options);
