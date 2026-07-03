@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { Heart, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +32,7 @@ import { useCategories } from '../../category/hooks/useCategory.ts';
 import type { Category } from '../../category/types/category.types';
 import { useDeleteSpill, useSpills, useUpdateSpill } from '../hooks/useSpill.ts';
 import type { Spill as SpillType } from '../types/spill.types.ts';
+import { useIntersectionObserver } from '../../../shared/hooks/useIntersectionObserver.ts';
 
 export function SpillList() {
   const { data: spills, isLoading: isSpillsLoading, isError: isSpillsError } = useSpills();
@@ -44,6 +45,10 @@ export function SpillList() {
   const updateMutation = useUpdateSpill();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
+  const [limit, setLimit] = useState(5);
+  const [loadMoreNode, setLoadMoreNode] = useState<HTMLDivElement | null>(null);
+  const entry = useIntersectionObserver(loadMoreNode, { threshold: 0.1 });
+
   const hasFavourites = spills?.some((a: SpillType) => a.is_favourite);
   const activeCategoryIds = new Set(spills?.map((a: SpillType) => a.category_id).filter(Boolean));
   const activeCategories = categories?.filter((c: Category) => activeCategoryIds.has(c.id)) || [];
@@ -55,12 +60,24 @@ export function SpillList() {
         ? spills?.filter((a: SpillType) => a.category_id === selectedCategoryId)
         : spills;
 
+  useEffect(() => {
+    if (entry?.isIntersecting && filteredSpills && limit < filteredSpills.length) {
+      setLimit((prev) => prev + 5);
+    }
+  }, [entry?.isIntersecting, filteredSpills, limit]);
+
+  useEffect(() => {
+    setLimit(5);
+  }, [selectedCategoryId]);
+
+  const visibleSpills = filteredSpills?.slice(0, limit);
+
   const isLoading = isSpillsLoading || isCategoriesLoading;
   const isError = isSpillsError || isCategoriesError;
 
   if (isLoading) {
     return (
-      <div className="mt-6 flex w-full max-w-5xl flex-col gap-6">
+      <div className="mt-6 flex w-full max-w-5xl flex-col gap-6 pb-24">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">Spill Link</h2>
           <Button size="lg" disabled className="opacity-50">
@@ -104,7 +121,7 @@ export function SpillList() {
   }
 
   return (
-    <div className="mt-6 flex w-full max-w-5xl flex-col gap-6">
+    <div className="mt-6 flex w-full max-w-5xl flex-col gap-6 pb-24">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Spill Link</h2>
         <Link to="/admin/spill-link/create">
@@ -147,14 +164,14 @@ export function SpillList() {
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredSpills?.length === 0 ? (
+        {visibleSpills?.length === 0 ? (
           <div className="col-span-full flex min-h-[50vh] items-center justify-center">
             <p className="text-gray-500 text-center text-lg">
               Tidak ada data ditemukan, buat minimal 1 Bella!
             </p>
           </div>
         ) : (
-          filteredSpills?.map((item: SpillType) => (
+          visibleSpills?.map((item: SpillType) => (
             <Card key={item.id} className="flex flex-col">
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 gap-4">
                 <div className="flex flex-col gap-1.5 overflow-hidden">
@@ -261,6 +278,12 @@ export function SpillList() {
           ))
         )}
       </div>
+
+      {filteredSpills && limit < filteredSpills.length && (
+        <div ref={setLoadMoreNode} className="col-span-full flex justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        </div>
+      )}
     </div>
   );
 }

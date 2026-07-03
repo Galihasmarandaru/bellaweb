@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
-import { Heart, MapPin } from 'lucide-react';
-import { useState } from 'react';
+import { Heart, MapPin, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useIntersectionObserver } from '../../../shared/hooks/useIntersectionObserver.ts';
 import { Footer, SearchAutocomplete } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,6 +20,10 @@ export function Accomodation() {
   const { data: accomodations, isLoading: isAccLoading, isError: isAccError } = useAccomodations();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedSearchItem, setSelectedSearchItem] = useState<{ id: string } | null>(null);
+
+  const [limit, setLimit] = useState(5);
+  const [loadMoreNode, setLoadMoreNode] = useState<HTMLDivElement | null>(null);
+  const entry = useIntersectionObserver(loadMoreNode, { threshold: 0.1 });
 
   const isLoading = isCatLoading || isAccLoading;
   const isError = isCatError || isAccError;
@@ -40,6 +45,18 @@ export function Accomodation() {
   const displayAccomodations = selectedSearchItem
     ? accomodations?.filter((a: AccomodationType) => a.id === selectedSearchItem.id)
     : filteredAccomodations;
+
+  const visibleAccomodations = displayAccomodations?.slice(0, limit);
+
+  useEffect(() => {
+    if (entry?.isIntersecting && displayAccomodations && limit < displayAccomodations.length) {
+      setLimit((prev) => prev + 5);
+    }
+  }, [entry?.isIntersecting, displayAccomodations, limit]);
+
+  useEffect(() => {
+    setLimit(5);
+  }, [selectedCategoryId, selectedSearchItem]);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 font-sans">
@@ -156,7 +173,7 @@ export function Accomodation() {
             <div
               className={`mb-10 grid grid-cols-1 gap-6 ${selectedSearchItem ? 'max-w-md mx-auto' : 'sm:grid-cols-2'}`}
             >
-              {displayAccomodations?.map((item: AccomodationType) => (
+              {visibleAccomodations?.map((item: AccomodationType) => (
                 <Card
                   key={item.id}
                   className="overflow-hidden rounded-[20px] border-slate-100 p-0 gap-0 shadow-sm transition-transform hover:scale-[1.01]"
@@ -220,6 +237,12 @@ export function Accomodation() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          )}
+
+          {displayAccomodations && limit < displayAccomodations.length && (
+            <div ref={setLoadMoreNode} className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
             </div>
           )}
         </div>

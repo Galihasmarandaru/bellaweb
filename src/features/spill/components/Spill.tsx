@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
-import { Heart } from 'lucide-react';
-import { useState } from 'react';
+import { Heart, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useIntersectionObserver } from '../../../shared/hooks/useIntersectionObserver.ts';
 import { Footer, SearchAutocomplete } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,6 +16,10 @@ export function Spill() {
   const { data: spills, isLoading: isSpillsLoading, isError: isSpillsError } = useSpills();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedSearchItem, setSelectedSearchItem] = useState<{ id: string } | null>(null);
+
+  const [limit, setLimit] = useState(5);
+  const [loadMoreNode, setLoadMoreNode] = useState<HTMLDivElement | null>(null);
+  const entry = useIntersectionObserver(loadMoreNode, { threshold: 0.1 });
 
   const isLoading = isCatLoading || isSpillsLoading;
   const isError = isCatError || isSpillsError;
@@ -34,6 +39,18 @@ export function Spill() {
   const displaySpills = selectedSearchItem
     ? spills?.filter((a: SpillType) => a.id === selectedSearchItem.id)
     : filteredSpills;
+
+  const visibleSpills = displaySpills?.slice(0, limit);
+
+  useEffect(() => {
+    if (entry?.isIntersecting && displaySpills && limit < displaySpills.length) {
+      setLimit((prev) => prev + 5);
+    }
+  }, [entry?.isIntersecting, displaySpills, limit]);
+
+  useEffect(() => {
+    setLimit(5);
+  }, [selectedCategoryId, selectedSearchItem]);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 font-sans">
@@ -150,7 +167,7 @@ export function Spill() {
             <div
               className={`mb-10 grid grid-cols-2 gap-4 sm:grid-cols-3 ${selectedSearchItem ? 'max-w-md mx-auto' : ''}`}
             >
-              {displaySpills?.map((item: SpillType) => (
+              {visibleSpills?.map((item: SpillType) => (
                 <Card
                   key={item.id}
                   className="overflow-hidden rounded-[20px] border-slate-100 p-0 gap-0 shadow-sm transition-transform hover:scale-[1.01]"
@@ -205,6 +222,12 @@ export function Spill() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          )}
+
+          {displaySpills && limit < displaySpills.length && (
+            <div ref={setLoadMoreNode} className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
             </div>
           )}
         </div>

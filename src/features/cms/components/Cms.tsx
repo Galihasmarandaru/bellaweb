@@ -53,7 +53,7 @@ export function Cms() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-gray-50">
-      <header className="relative flex h-16 w-full items-center justify-between bg-white px-6 shadow-sm">
+      <header className="fixed top-0 z-50 flex h-16 w-full items-center justify-between bg-white px-6 shadow-sm">
         <div className="flex w-[100px] items-center">
           {!isHome && (
             <Button
@@ -165,7 +165,7 @@ export function Cms() {
         </div>
       </header>
 
-      <main className="flex w-full flex-1 flex-col items-center p-6">
+      <main className="mt-16 flex w-full flex-1 flex-col items-center p-6">
         <Outlet />
       </main>
     </div>

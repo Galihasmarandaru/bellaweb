@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { Heart, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +36,7 @@ import {
   useUpdateAccomodation,
 } from '../hooks/useAccomodation.ts';
 import type { Accomodation as AccomodationType } from '../types/accomodation.types';
+import { useIntersectionObserver } from '../../../shared/hooks/useIntersectionObserver.ts';
 
 export function AccomodationList() {
   const {
@@ -52,12 +53,9 @@ export function AccomodationList() {
   const updateMutation = useUpdateAccomodation();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-  const hasFavourites = accomodations?.some((a: AccomodationType) => a.is_favourite);
-  const activeCategoryIds = new Set(
-    accomodations?.map((a: AccomodationType) => a.category_id).filter(Boolean),
-  );
-  const activeCategories =
-    categories?.filter((category: Category) => activeCategoryIds.has(category.id)) || [];
+  const [limit, setLimit] = useState(5);
+  const [loadMoreNode, setLoadMoreNode] = useState<HTMLDivElement | null>(null);
+  const entry = useIntersectionObserver(loadMoreNode, { threshold: 0.1 });
 
   const filteredAccomodations =
     selectedCategoryId === 'favourite'
@@ -66,12 +64,31 @@ export function AccomodationList() {
         ? accomodations?.filter((a: AccomodationType) => a.category_id === selectedCategoryId)
         : accomodations;
 
+  useEffect(() => {
+    if (entry?.isIntersecting && filteredAccomodations && limit < filteredAccomodations.length) {
+      setLimit((prev) => prev + 5);
+    }
+  }, [entry?.isIntersecting, filteredAccomodations, limit]);
+
+  useEffect(() => {
+    setLimit(5);
+  }, [selectedCategoryId]);
+
+  const hasFavourites = accomodations?.some((a: AccomodationType) => a.is_favourite);
+  const activeCategoryIds = new Set(
+    accomodations?.map((a: AccomodationType) => a.category_id).filter(Boolean),
+  );
+  const activeCategories =
+    categories?.filter((category: Category) => activeCategoryIds.has(category.id)) || [];
+
+  const visibleAccomodations = filteredAccomodations?.slice(0, limit);
+
   const isLoading = isAccomodationsLoading || isCategoriesLoading;
   const isError = isAccomodationsError || isCategoriesError;
 
   if (isLoading) {
     return (
-      <div className="mt-6 flex w-full max-w-5xl flex-col gap-6">
+      <div className="mt-6 flex w-full max-w-5xl flex-col gap-6 pb-24">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">Penginapan</h2>
           <Button size="lg" disabled className="opacity-50">
@@ -115,7 +132,7 @@ export function AccomodationList() {
   }
 
   return (
-    <div className="mt-6 flex w-full max-w-5xl flex-col gap-6">
+    <div className="mt-6 flex w-full max-w-5xl flex-col gap-6 pb-24">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Penginapan</h2>
         <Link to="/admin/penginapan/create">
@@ -158,14 +175,14 @@ export function AccomodationList() {
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredAccomodations?.length === 0 ? (
+        {visibleAccomodations?.length === 0 ? (
           <div className="col-span-full flex min-h-[50vh] items-center justify-center">
             <p className="text-gray-500 text-center text-lg">
               Tidak ada data ditemukan, buat minimal 1 Bella!
             </p>
           </div>
         ) : (
-          filteredAccomodations?.map((item: AccomodationType) => (
+          visibleAccomodations?.map((item: AccomodationType) => (
             <Card key={item.id} className="flex flex-col">
               <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2 gap-4">
                 <div className="flex flex-col gap-1.5 overflow-hidden">
@@ -276,6 +293,12 @@ export function AccomodationList() {
           ))
         )}
       </div>
+
+      {filteredAccomodations && limit < filteredAccomodations.length && (
+        <div ref={setLoadMoreNode} className="col-span-full flex justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        </div>
+      )}
     </div>
   );
 }
