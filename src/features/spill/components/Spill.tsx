@@ -209,8 +209,6 @@ export function Spill() {
                       <div className="flex w-full items-center gap-2">
                         <a
                           href={item.detail_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className="w-full block"
                         >
                           <Button className="h-auto w-full rounded-lg border border-[#1A3B2B] bg-transparent py-2.5 text-[13px] font-medium text-[#1A3B2B] shadow-none transition-colors hover:bg-[#1A3B2B]/5">
