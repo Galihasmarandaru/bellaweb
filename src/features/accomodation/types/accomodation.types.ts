@@ -6,7 +6,7 @@ export interface Accomodation {
   detail_url?: string;
   location?: string;
   image_url?: string;
-  category_id?: string;
+  category_ids?: string[];
   is_favourite?: boolean;
   created_at?: string;
 }
@@ -18,7 +18,7 @@ export interface CreateAccomodationPayload {
   detail_url?: string;
   location?: string;
   image_url?: string;
-  category_id?: string;
+  category_ids?: string[];
   is_favourite?: boolean;
 }
 

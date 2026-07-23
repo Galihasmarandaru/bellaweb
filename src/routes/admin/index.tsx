@@ -18,6 +18,11 @@ function AdminDashboard() {
           🔗 Kelola Spill Link
         </Button>
       </Link>
+      <Link to="/admin/invoice" className="w-full">
+        <Button className="h-auto w-full rounded-xl border border-[#1b3b2c] bg-transparent px-6 py-10 text-center font-semibold text-lg text-[#1b3b2c] shadow-sm transition-transform hover:scale-[1.02] hover:bg-[#1b3b2c]/5">
+          📄 Generate Invoice
+        </Button>
+      </Link>
     </div>
   );
 }

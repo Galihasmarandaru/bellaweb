@@ -50,14 +50,14 @@ export function SpillList() {
   const entry = useIntersectionObserver(loadMoreNode, { threshold: 0.1 });
 
   const hasFavourites = spills?.some((a: SpillType) => a.is_favourite);
-  const activeCategoryIds = new Set(spills?.map((a: SpillType) => a.category_id).filter(Boolean));
+  const activeCategoryIds = new Set(spills?.flatMap((a: SpillType) => a.category_ids || []).filter(Boolean));
   const activeCategories = categories?.filter((c: Category) => activeCategoryIds.has(c.id)) || [];
 
   const filteredSpills =
     selectedCategoryId === 'favourite'
       ? spills?.filter((a: SpillType) => a.is_favourite)
       : selectedCategoryId
-        ? spills?.filter((a: SpillType) => a.category_id === selectedCategoryId)
+        ? spills?.filter((a: SpillType) => a.category_ids?.includes(selectedCategoryId))
         : spills;
 
   useEffect(() => {

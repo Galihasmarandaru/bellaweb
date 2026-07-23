@@ -5,7 +5,7 @@ export interface Spill {
   room_tour_url?: string;
   detail_url?: string;
   image_url?: string;
-  category_id?: string;
+  category_ids?: string[];
   is_favourite?: boolean;
   created_at?: string;
 }
@@ -16,7 +16,7 @@ export interface CreateSpillPayload {
   room_tour_url?: string;
   detail_url?: string;
   image_url?: string;
-  category_id?: string;
+  category_ids?: string[];
   is_favourite?: boolean;
 }
 

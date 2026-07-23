@@ -10,7 +10,7 @@ export const accomodationSchema = z.object({
     .min(1, 'Mohon pastikan form ini terisi')
     .refine((val) => val === '' || /^https?:\/\//.test(val), 'Must be a valid URL'),
   image_url: z.string(),
-  category_id: z.string(),
+  category_ids: z.array(z.string()),
 });
 
 export type AccomodationSchema = z.infer<typeof accomodationSchema>;

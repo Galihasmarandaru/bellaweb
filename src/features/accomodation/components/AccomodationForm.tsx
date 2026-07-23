@@ -53,12 +53,14 @@ export function AccomodationForm({ initialData, onSuccess, onCancel }: Accomodat
 
   const { data: categories = [], isLoading: isLoadingCategories } = useCategories('accomodation');
   const [openCategory, setOpenCategory] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>(initialData?.category_id || '');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialData?.category_ids || []);
   const [categoryError, setCategoryError] = useState('');
   const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false);
 
-  const selectedCategoryName =
-    categories.find((c: Category) => c.id === selectedCategory)?.name || '';
+  const selectedCategoryNames = categories
+    .filter((c: Category) => selectedCategories.includes(c.id))
+    .map((c: Category) => c.name)
+    .join(', ');
   const isSaving = createMutation.isPending || updateMutation.isPending || uploadMutation.isPending;
 
   const form = useForm({
@@ -69,7 +71,7 @@ export function AccomodationForm({ initialData, onSuccess, onCancel }: Accomodat
       detail_url: initialData?.detail_url || '',
       location: initialData?.location || '',
       image_url: initialData?.image_url || '',
-      category_id: initialData?.category_id || '',
+      category_ids: initialData?.category_ids || [],
     },
     validators: { onChange: accomodationSchema },
     onSubmit: async ({ value }) => {
@@ -77,7 +79,7 @@ export function AccomodationForm({ initialData, onSuccess, onCancel }: Accomodat
         setImageError('Mohon pastikan form ini terisi');
         return;
       }
-      if (!selectedCategory) {
+      if (selectedCategories.length === 0) {
         setCategoryError('Mohon pastikan form ini terisi');
         return;
       }
@@ -98,7 +100,7 @@ export function AccomodationForm({ initialData, onSuccess, onCancel }: Accomodat
         const payload: CreateAccomodationPayload = {
           ...value,
           image_url: imageUrl,
-          category_id: selectedCategory || undefined,
+          category_ids: selectedCategories.length > 0 ? selectedCategories : undefined,
         };
 
         if (initialData) {
@@ -329,8 +331,10 @@ export function AccomodationForm({ initialData, onSuccess, onCancel }: Accomodat
                   />
                 }
               >
-                {selectedCategoryName || (isLoadingCategories ? 'Loading...' : 'Pilih Kategori...')}
-                <ChevronDown className="h-4 w-4 opacity-50" />
+                <div className="truncate text-left flex-1 pr-2">
+                  {selectedCategoryNames || (isLoadingCategories ? 'Loading...' : 'Pilih Kategori...')}
+                </div>
+                <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
               </PopoverTrigger>
               <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
                 <Command>
@@ -343,13 +347,17 @@ export function AccomodationForm({ initialData, onSuccess, onCancel }: Accomodat
                           key={category.id}
                           value={category.name}
                           onSelect={() => {
-                            setSelectedCategory(
-                              category.id === selectedCategory ? '' : category.id,
+                            setSelectedCategories((prev) => 
+                              prev.includes(category.id)
+                                ? prev.filter((id) => id !== category.id)
+                                : [...prev, category.id]
                             );
-                            if (category.id) setCategoryError('');
-                            setOpenCategory(false);
+                            setCategoryError('');
                           }}
                         >
+                          <div className={`mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-[#1b3b2c] ${selectedCategories.includes(category.id) ? 'bg-[#1b3b2c] text-white' : 'opacity-50 [&_svg]:invisible'}`}>
+                            <CheckCircle2 className="h-3 w-3" />
+                          </div>
                           {category.name}
                         </CommandItem>
                       ))}
@@ -397,7 +405,7 @@ export function AccomodationForm({ initialData, onSuccess, onCancel }: Accomodat
                 setImageError('Mohon pastikan form ini terisi');
                 return;
               }
-              if (!selectedCategory) {
+              if (selectedCategories.length === 0) {
                 setCategoryError('Mohon pastikan form ini terisi');
                 return;
               }

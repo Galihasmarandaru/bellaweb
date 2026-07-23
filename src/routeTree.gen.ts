@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminSpillLinkIndexRouteImport } from './routes/admin/spill-link/index'
 import { Route as AdminPenginapanIndexRouteImport } from './routes/admin/penginapan/index'
+import { Route as AdminInvoiceIndexRouteImport } from './routes/admin/invoice/index'
 import { Route as AdminSpillLinkCreateRouteImport } from './routes/admin/spill-link/create'
 import { Route as AdminPenginapanCreateRouteImport } from './routes/admin/penginapan/create'
 import { Route as AdminSpillLinkIdEditRouteImport } from './routes/admin/spill-link/$id.edit'
@@ -62,6 +63,11 @@ const AdminPenginapanIndexRoute = AdminPenginapanIndexRouteImport.update({
   path: '/penginapan/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminInvoiceIndexRoute = AdminInvoiceIndexRouteImport.update({
+  id: '/invoice/',
+  path: '/invoice/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSpillLinkCreateRoute = AdminSpillLinkCreateRouteImport.update({
   id: '/spill-link/create',
   path: '/spill-link/create',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/admin/penginapan/create': typeof AdminPenginapanCreateRoute
   '/admin/spill-link/create': typeof AdminSpillLinkCreateRoute
+  '/admin/invoice/': typeof AdminInvoiceIndexRoute
   '/admin/penginapan/': typeof AdminPenginapanIndexRoute
   '/admin/spill-link/': typeof AdminSpillLinkIndexRoute
   '/admin/penginapan/$id/edit': typeof AdminPenginapanIdEditRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/admin/penginapan/create': typeof AdminPenginapanCreateRoute
   '/admin/spill-link/create': typeof AdminSpillLinkCreateRoute
+  '/admin/invoice': typeof AdminInvoiceIndexRoute
   '/admin/penginapan': typeof AdminPenginapanIndexRoute
   '/admin/spill-link': typeof AdminSpillLinkIndexRoute
   '/admin/penginapan/$id/edit': typeof AdminPenginapanIdEditRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/admin/penginapan/create': typeof AdminPenginapanCreateRoute
   '/admin/spill-link/create': typeof AdminSpillLinkCreateRoute
+  '/admin/invoice/': typeof AdminInvoiceIndexRoute
   '/admin/penginapan/': typeof AdminPenginapanIndexRoute
   '/admin/spill-link/': typeof AdminSpillLinkIndexRoute
   '/admin/penginapan/$id/edit': typeof AdminPenginapanIdEditRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/penginapan/create'
     | '/admin/spill-link/create'
+    | '/admin/invoice/'
     | '/admin/penginapan/'
     | '/admin/spill-link/'
     | '/admin/penginapan/$id/edit'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/penginapan/create'
     | '/admin/spill-link/create'
+    | '/admin/invoice'
     | '/admin/penginapan'
     | '/admin/spill-link'
     | '/admin/penginapan/$id/edit'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/penginapan/create'
     | '/admin/spill-link/create'
+    | '/admin/invoice/'
     | '/admin/penginapan/'
     | '/admin/spill-link/'
     | '/admin/penginapan/$id/edit'
@@ -235,6 +247,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPenginapanIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/invoice/': {
+      id: '/admin/invoice/'
+      path: '/invoice'
+      fullPath: '/admin/invoice/'
+      preLoaderRoute: typeof AdminInvoiceIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/spill-link/create': {
       id: '/admin/spill-link/create'
       path: '/spill-link/create'
@@ -270,6 +289,7 @@ interface AdminRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminPenginapanCreateRoute: typeof AdminPenginapanCreateRoute
   AdminSpillLinkCreateRoute: typeof AdminSpillLinkCreateRoute
+  AdminInvoiceIndexRoute: typeof AdminInvoiceIndexRoute
   AdminPenginapanIndexRoute: typeof AdminPenginapanIndexRoute
   AdminSpillLinkIndexRoute: typeof AdminSpillLinkIndexRoute
   AdminPenginapanIdEditRoute: typeof AdminPenginapanIdEditRoute
@@ -280,6 +300,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminPenginapanCreateRoute: AdminPenginapanCreateRoute,
   AdminSpillLinkCreateRoute: AdminSpillLinkCreateRoute,
+  AdminInvoiceIndexRoute: AdminInvoiceIndexRoute,
   AdminPenginapanIndexRoute: AdminPenginapanIndexRoute,
   AdminSpillLinkIndexRoute: AdminSpillLinkIndexRoute,
   AdminPenginapanIdEditRoute: AdminPenginapanIdEditRoute,

@@ -25,7 +25,7 @@ export function Spill() {
   const isError = isCatError || isSpillsError;
 
   const hasFavourites = spills?.some((a: SpillType) => a.is_favourite);
-  const activeCategoryIds = new Set(spills?.map((a: SpillType) => a.category_id).filter(Boolean));
+  const activeCategoryIds = new Set(spills?.flatMap((a: SpillType) => a.category_ids || []).filter(Boolean));
   const activeCategories =
     categories?.filter((category: Category) => activeCategoryIds.has(category.id)) || [];
 
@@ -33,7 +33,7 @@ export function Spill() {
     selectedCategoryId === 'favourite'
       ? spills?.filter((a: SpillType) => a.is_favourite)
       : selectedCategoryId
-        ? spills?.filter((a: SpillType) => a.category_id === selectedCategoryId)
+        ? spills?.filter((a: SpillType) => a.category_ids?.includes(selectedCategoryId))
         : spills;
 
   const displaySpills = selectedSearchItem

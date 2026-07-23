@@ -61,7 +61,7 @@ export function AccomodationList() {
     selectedCategoryId === 'favourite'
       ? accomodations?.filter((a: AccomodationType) => a.is_favourite)
       : selectedCategoryId
-        ? accomodations?.filter((a: AccomodationType) => a.category_id === selectedCategoryId)
+        ? accomodations?.filter((a: AccomodationType) => a.category_ids?.includes(selectedCategoryId))
         : accomodations;
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export function AccomodationList() {
 
   const hasFavourites = accomodations?.some((a: AccomodationType) => a.is_favourite);
   const activeCategoryIds = new Set(
-    accomodations?.map((a: AccomodationType) => a.category_id).filter(Boolean),
+    accomodations?.flatMap((a: AccomodationType) => a.category_ids || []).filter(Boolean),
   );
   const activeCategories =
     categories?.filter((category: Category) => activeCategoryIds.has(category.id)) || [];
