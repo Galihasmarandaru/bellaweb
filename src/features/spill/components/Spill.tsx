@@ -1,11 +1,11 @@
-import { Link } from '@tanstack/react-router';
-import { Heart, Loader2 } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { useIntersectionObserver } from '../../../shared/hooks/useIntersectionObserver.ts';
 import { Footer, SearchAutocomplete } from '@/components/shared';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Link } from '@tanstack/react-router';
+import { Heart, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useIntersectionObserver } from '../../../shared/hooks/useIntersectionObserver.ts';
 import { useCategories } from '../../category/hooks/useCategory.ts';
 import type { Category } from '../../category/types/category.types';
 import { useSpills } from '../hooks/useSpill.ts';
@@ -79,7 +79,7 @@ export function Spill() {
             className="font-bold font-serif text-[24px] md:text-3xl text-[#1b3b2c] italic leading-tight text-right"
             style={{ fontFamily: '"Playfair Display", "Times New Roman", serif' }}
           >
-            Rekomendasi Barang
+            Spill Link
           </h1>
         </div>
       </div>
