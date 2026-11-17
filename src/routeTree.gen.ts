@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SpillLinkRouteImport } from './routes/spill-link'
+import { Route as RateCardGeneratorRouteImport } from './routes/rate-card-generator'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccomodationRouteImport } from './routes/accomodation'
@@ -26,6 +27,11 @@ import { Route as AdminPenginapanIdEditRouteImport } from './routes/admin/pengin
 const SpillLinkRoute = SpillLinkRouteImport.update({
   id: '/spill-link',
   path: '/spill-link',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RateCardGeneratorRoute = RateCardGeneratorRouteImport.update({
+  id: '/rate-card-generator',
+  path: '/rate-card-generator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/accomodation': typeof AccomodationRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/rate-card-generator': typeof RateCardGeneratorRoute
   '/spill-link': typeof SpillLinkRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/penginapan/create': typeof AdminPenginapanCreateRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/accomodation': typeof AccomodationRoute
   '/login': typeof LoginRoute
+  '/rate-card-generator': typeof RateCardGeneratorRoute
   '/spill-link': typeof SpillLinkRoute
   '/admin': typeof AdminIndexRoute
   '/admin/penginapan/create': typeof AdminPenginapanCreateRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/accomodation': typeof AccomodationRoute
   '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/rate-card-generator': typeof RateCardGeneratorRoute
   '/spill-link': typeof SpillLinkRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/penginapan/create': typeof AdminPenginapanCreateRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/accomodation'
     | '/admin'
     | '/login'
+    | '/rate-card-generator'
     | '/spill-link'
     | '/admin/'
     | '/admin/penginapan/create'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/'
     | '/accomodation'
     | '/login'
+    | '/rate-card-generator'
     | '/spill-link'
     | '/admin'
     | '/admin/penginapan/create'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '/accomodation'
     | '/admin'
     | '/login'
+    | '/rate-card-generator'
     | '/spill-link'
     | '/admin/'
     | '/admin/penginapan/create'
@@ -186,6 +198,7 @@ export interface RootRouteChildren {
   AccomodationRoute: typeof AccomodationRoute
   AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRoute
+  RateCardGeneratorRoute: typeof RateCardGeneratorRoute
   SpillLinkRoute: typeof SpillLinkRoute
 }
 
@@ -196,6 +209,13 @@ declare module '@tanstack/react-router' {
       path: '/spill-link'
       fullPath: '/spill-link'
       preLoaderRoute: typeof SpillLinkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rate-card-generator': {
+      id: '/rate-card-generator'
+      path: '/rate-card-generator'
+      fullPath: '/rate-card-generator'
+      preLoaderRoute: typeof RateCardGeneratorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -314,6 +334,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccomodationRoute: AccomodationRoute,
   AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
+  RateCardGeneratorRoute: RateCardGeneratorRoute,
   SpillLinkRoute: SpillLinkRoute,
 }
 export const routeTree = rootRouteImport

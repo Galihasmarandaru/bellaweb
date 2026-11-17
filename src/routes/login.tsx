@@ -1,15 +1,8 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
-import { LoginForm } from '../features/auth/index.ts';
-import { $isAuthenticated } from '../features/auth/stores/authStore.ts';
+import { createFileRoute } from '@tanstack/react-router';
+import { LoginForm, redirectIfAuthenticated } from '@/features/auth';
 
 export const Route = createFileRoute('/login')({
-  beforeLoad: () => {
-    if ($isAuthenticated.get()) {
-      throw redirect({
-        to: '/admin',
-      });
-    }
-  },
+  beforeLoad: redirectIfAuthenticated,
   component: RouteComponent,
 });
 

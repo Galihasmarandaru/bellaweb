@@ -1,15 +1,9 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
-import { $isAuthenticated } from '../features/auth/stores/authStore.ts';
-import { Cms } from '../features/cms';
+import { createFileRoute } from '@tanstack/react-router';
+import { requireAdminAuth } from '@/features/auth';
+import { Cms } from '@/features/cms';
 
 export const Route = createFileRoute('/admin')({
-  beforeLoad: () => {
-    if (!$isAuthenticated.get()) {
-      throw redirect({
-        to: '/login',
-      });
-    }
-  },
+  beforeLoad: requireAdminAuth,
   component: AdminRoute,
 });
 
