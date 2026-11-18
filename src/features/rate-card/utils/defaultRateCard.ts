@@ -6,6 +6,8 @@ export const DEFAULT_IMAGES = {
   cutoutSlide7: '/images/rate-card/cutout-1413.png',
   polaroid1: '/images/rate-card/photo-6077.jpg',
   polaroid2: '/images/rate-card/photo-1413.jpg',
+  coverPhoto3: '/images/rate-card/photo-6364.jpg',
+  coverPhoto4: '/images/rate-card/photo-0242.jpg',
   polaroid3: '/images/rate-card/profile.jpg',
   polaroid4: '/images/rate-card/photo-7387.jpg',
   igAccount: '/images/rate-card/ig-account.jpg',
@@ -15,36 +17,36 @@ export const DEFAULT_IMAGES = {
 } as const;
 
 export const DEFAULT_RATE_CARD_DATA: RateCardData = {
-  name: 'Bella Rhema',
+  name: 'Bella Rhema Agnesia',
   shortName: 'BELLA',
-  tagline: 'TRAVELING • LIFESTYLE • RUNNING • REVIEWER • CONTENT CREATOR',
+  tagline: 'TRAVELING • LIFESTYLE • HOTEL REVIEWER • CONTENT CREATOR',
   instagramHandle: '@bellarhemaagnesia',
   tiktokHandle: '@bellarhemaagnesiaa',
   phone: '089504643409',
-  email: 'aisyahichaa10@gmail.com',
+  email: 'bellarhema4@gmail.com',
   location: 'Yogyakarta, Indonesia',
 
-  bio: 'Content creator yang berfokus pada review penginapan, traveling, running, dan lifestyle dengan visual yang estetik serta storytelling yang autentik.\n\nSenang mengeksplorasi pengalaman baru dan menghadirkan rekomendasi produk maupun destinasi secara natural dan relatable untuk audiens.',
+  bio: 'Content creator yang berfokus pada hotel review , traveling, dan lifestyle dengan visual yang estetik serta storytelling yang autentik.\n\nSenang mengeksplorasi pengalaman baru dan menghadirkan rekomendasi produk maupun destinasi secara natural dan relatable untuk audiens.',
 
   visitTitle: 'VISIT',
   visitPackages: [
     {
       id: 'visit-1',
       name: 'Instagram Package',
-      price: '650K',
+      price: '500K',
       description:
         '1x Post (Feed/Reels) | 1-2 Slide Instastory | Permanent Post | Mention Social Media & Collab Post',
     },
     {
       id: 'visit-2',
       name: 'TikTok Package',
-      price: '650K',
+      price: '500K',
       description: '1x Post | Permanent Post | Mention Social Media Brand',
     },
     {
       id: 'visit-3',
       name: 'Bundling Package',
-      price: '850K',
+      price: '650K',
       description: '1x Post TikTok & Instagram | Permanent Post | All Benefit Include',
     },
   ],
@@ -54,7 +56,7 @@ export const DEFAULT_RATE_CARD_DATA: RateCardData = {
     {
       id: 'collab-1',
       name: 'Brand Ambassador',
-      price: '2000K',
+      price: '2500K',
       description: '',
     },
     {
@@ -76,20 +78,20 @@ export const DEFAULT_RATE_CARD_DATA: RateCardData = {
     {
       id: 'endorse-1',
       name: 'Instagram Package',
-      price: '500K',
+      price: '400K',
       description:
         '1x Post (Feed/Reels) | 1-2 Slide Instastory | Permanent Post | Mention Social Media & Collab Post',
     },
     {
       id: 'endorse-2',
       name: 'TikTok Package',
-      price: '500K',
+      price: '400K',
       description: '1x Post | Permanent Post | Mention Social Media Brand',
     },
     {
       id: 'endorse-3',
       name: 'Bundling Package',
-      price: '650K',
+      price: '550K',
       description: '1x Post TikTok & Instagram | All Benefit Include',
     },
     {
@@ -121,6 +123,8 @@ export const DEFAULT_RATE_CARD_DATA: RateCardData = {
   cutoutSlide7Url: DEFAULT_IMAGES.cutoutSlide7,
   polaroid1Url: DEFAULT_IMAGES.polaroid1,
   polaroid2Url: DEFAULT_IMAGES.polaroid2,
+  coverPhoto3Url: DEFAULT_IMAGES.coverPhoto3,
+  coverPhoto4Url: DEFAULT_IMAGES.coverPhoto4,
   polaroid3Url: DEFAULT_IMAGES.polaroid3,
   polaroid4Url: DEFAULT_IMAGES.polaroid4,
   igAccountImageUrl: DEFAULT_IMAGES.igAccount,
@@ -129,8 +133,8 @@ export const DEFAULT_RATE_CARD_DATA: RateCardData = {
   tiktokInsightImageUrl: DEFAULT_IMAGES.tiktokInsight,
 
   bankName: 'BCA',
-  accountNumber: '2000854851',
-  accountHolder: 'Siti Aisyah',
+  accountNumber: '0091816716',
+  accountHolder: 'BELLA RHEMA AGNESIA',
 
   endorsementTerms: [
     {
@@ -175,7 +179,7 @@ export const DEFAULT_RATE_CARD_DATA: RateCardData = {
     },
     {
       id: 'visit-term-2',
-      text: 'Menerima visit dengan kategori: Traveling, Staycation, Lifestyle, Running & Kuliner.',
+      text: 'Menerima visit dengan kategori: Traveling, Staycation, Lifestyle, Running.',
     },
     {
       id: 'visit-term-3',

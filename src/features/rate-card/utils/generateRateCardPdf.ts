@@ -10,6 +10,8 @@ import type {
 const SLIDE_W = 297;
 const SLIDE_H = 167;
 const FOOTER_SAFE_BOTTOM_Y = 151;
+const TARGET_MAX_PDF_BYTES = 1.2 * 1024 * 1024;
+const IMAGE_COMPRESSION = 'MEDIUM' as const;
 
 const COLORS = {
   paper: [248, 248, 246] as const,
@@ -21,10 +23,58 @@ const COLORS = {
   white: [255, 255, 255] as const,
 };
 
+type PdfImageFormat = 'PNG' | 'JPEG';
+
 interface MeasuredAsset {
   dataUrl: string;
   aspect: number;
+  format: PdfImageFormat;
+  alias: string;
 }
+
+interface PdfCompressionPreset {
+  cutoutMaxDim: number;
+  polaroidFrameW: number;
+  polaroidFrameH: number;
+  polaroidPad: number;
+  screenshotMaxDim: number;
+  screenshotQuality: number;
+}
+
+const PDF_COMPRESSION_PRESETS: readonly PdfCompressionPreset[] = [
+  {
+    cutoutMaxDim: 760,
+    polaroidFrameW: 220,
+    polaroidFrameH: 259,
+    polaroidPad: 32,
+    screenshotMaxDim: 1100,
+    screenshotQuality: 0.82,
+  },
+  {
+    cutoutMaxDim: 620,
+    polaroidFrameW: 185,
+    polaroidFrameH: 218,
+    polaroidPad: 26,
+    screenshotMaxDim: 920,
+    screenshotQuality: 0.72,
+  },
+  {
+    cutoutMaxDim: 500,
+    polaroidFrameW: 156,
+    polaroidFrameH: 184,
+    polaroidPad: 22,
+    screenshotMaxDim: 780,
+    screenshotQuality: 0.62,
+  },
+  {
+    cutoutMaxDim: 400,
+    polaroidFrameW: 132,
+    polaroidFrameH: 155,
+    polaroidPad: 18,
+    screenshotMaxDim: 660,
+    screenshotQuality: 0.54,
+  },
+];
 
 interface PlatformInsightSlideOptions {
   platformTitle: string;
@@ -52,6 +102,42 @@ interface RateCardPackageSlideOptions {
   social: SocialHandles;
 }
 
+interface PreparedPdfAssets {
+  cutout1: MeasuredAsset | null;
+  cutout2: MeasuredAsset | null;
+  cutout7: MeasuredAsset | null;
+  polaroid1: MeasuredAsset | null;
+  polaroid2: MeasuredAsset | null;
+  coverPhoto3: MeasuredAsset | null;
+  coverPhoto4: MeasuredAsset | null;
+  polaroid3: MeasuredAsset | null;
+  polaroid4: MeasuredAsset | null;
+  igAccountImg: MeasuredAsset | null;
+  igInsightImg: MeasuredAsset | null;
+  ttAccountImg: MeasuredAsset | null;
+  ttInsightImg: MeasuredAsset | null;
+  lanyardTopPng: MeasuredAsset | null;
+  lanyardClipPng: MeasuredAsset | null;
+  cardsPng: MeasuredAsset | null;
+  scriptCard: MeasuredAsset | null;
+  scriptCardSmall: MeasuredAsset | null;
+  scriptHiThere: MeasuredAsset | null;
+  scriptInsight: MeasuredAsset | null;
+  scriptCondition: MeasuredAsset | null;
+  scriptPayment: MeasuredAsset | null;
+}
+
+const addMeasuredImage = (
+  doc: jsPDF,
+  asset: MeasuredAsset,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): void => {
+  doc.addImage(asset.dataUrl, asset.format, x, y, w, h, asset.alias, IMAGE_COMPRESSION);
+};
+
 const loadImageElement = (src: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const img = new Image();
@@ -61,92 +147,146 @@ const loadImageElement = (src: string): Promise<HTMLImageElement> =>
     img.src = src;
   });
 
-const loadCutoutPng = async (src: string): Promise<MeasuredAsset | null> => {
+const tryLoadImage = async (src: string): Promise<HTMLImageElement | null> => {
   if (!src) return null;
   try {
-    const img = await loadImageElement(src);
-    const canvas = document.createElement('canvas');
-    canvas.width = img.width;
-    canvas.height = img.height;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-    ctx.drawImage(img, 0, 0);
-    return {
-      dataUrl: canvas.toDataURL('image/png'),
-      aspect: img.width / Math.max(img.height, 1),
-    };
+    return await loadImageElement(src);
   } catch {
     return null;
   }
 };
 
-const createPolaroidPng = async (
-  src: string,
+const encodeCutoutPng = (
+  img: HTMLImageElement | null,
+  alias: string,
+  maxDim: number,
+): MeasuredAsset | null => {
+  if (!img) return null;
+  const maxSourceDim = Math.max(img.width, img.height, 1);
+  const scale = Math.min(1, maxDim / maxSourceDim);
+  const width = Math.max(1, Math.round(img.width * scale));
+  const height = Math.max(1, Math.round(img.height * scale));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, 0, 0, width, height);
+
+  return {
+    dataUrl: canvas.toDataURL('image/png'),
+    aspect: img.width / Math.max(img.height, 1),
+    format: 'PNG',
+    alias,
+  };
+};
+
+const encodeScreenshotJpeg = (
+  img: HTMLImageElement | null,
+  alias: string,
+  maxDim: number,
+  quality: number,
+): MeasuredAsset | null => {
+  if (!img) return null;
+  const maxSourceDim = Math.max(img.width, img.height, 1);
+  const scale = Math.min(1, maxDim / maxSourceDim);
+  const width = Math.max(1, Math.round(img.width * scale));
+  const height = Math.max(1, Math.round(img.height * scale));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, width, height);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, 0, 0, width, height);
+
+  return {
+    dataUrl: canvas.toDataURL('image/jpeg', quality),
+    aspect: img.width / Math.max(img.height, 1),
+    format: 'JPEG',
+    alias,
+  };
+};
+
+const createPolaroidPng = (
+  img: HTMLImageElement | null,
+  alias: string,
   angleDeg: number,
-  frameW = 340,
-  frameH = 400,
-): Promise<MeasuredAsset | null> => {
-  if (!src) return null;
-  try {
-    const img = await loadImageElement(src);
-    const pad = 64;
-    const canvas = document.createElement('canvas');
-    canvas.width = frameW + pad * 2;
-    canvas.height = frameH + pad * 2;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
+  frameW: number,
+  frameH: number,
+  pad: number,
+): MeasuredAsset | null => {
+  if (!img) return null;
 
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.rotate((angleDeg * Math.PI) / 180);
+  const scale = frameW / 340;
+  const canvas = document.createElement('canvas');
+  canvas.width = frameW + pad * 2;
+  canvas.height = frameH + pad * 2;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
 
-    ctx.save();
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.22)';
-    ctx.shadowBlur = 18;
-    ctx.shadowOffsetX = 4;
-    ctx.shadowOffsetY = 8;
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(-frameW / 2, -frameH / 2, frameW, frameH);
-    ctx.restore();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate((angleDeg * Math.PI) / 180);
 
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(-frameW / 2, -frameH / 2, frameW, frameH);
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.22)';
+  ctx.shadowBlur = 18 * scale;
+  ctx.shadowOffsetX = 4 * scale;
+  ctx.shadowOffsetY = 8 * scale;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(-frameW / 2, -frameH / 2, frameW, frameH);
+  ctx.restore();
 
-    const border = 20;
-    const bottomExtra = 44;
-    const photoX = -frameW / 2 + border;
-    const photoY = -frameH / 2 + border;
-    const photoW = frameW - border * 2;
-    const photoH = frameH - border - bottomExtra;
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+  ctx.lineWidth = Math.max(1, 2 * scale);
+  ctx.strokeRect(-frameW / 2, -frameH / 2, frameW, frameH);
 
-    const targetRatio = photoW / photoH;
-    const imgRatio = img.width / img.height;
-    let sourceX = 0;
-    let sourceY = 0;
-    let sourceW = img.width;
-    let sourceH = img.height;
-    if (imgRatio > targetRatio) {
-      sourceW = img.height * targetRatio;
-      sourceX = (img.width - sourceW) / 2;
-    } else {
-      sourceH = img.width / targetRatio;
-      sourceY = (img.height - sourceH) / 2;
-    }
+  const border = Math.max(8, Math.round(20 * scale));
+  const bottomExtra = Math.max(16, Math.round(44 * scale));
+  const photoX = -frameW / 2 + border;
+  const photoY = -frameH / 2 + border;
+  const photoW = frameW - border * 2;
+  const photoH = frameH - border - bottomExtra;
 
-    ctx.drawImage(img, sourceX, sourceY, sourceW, sourceH, photoX, photoY, photoW, photoH);
-
-    return {
-      dataUrl: canvas.toDataURL('image/png'),
-      aspect: canvas.width / canvas.height,
-    };
-  } catch {
-    return null;
+  const targetRatio = photoW / photoH;
+  const imgRatio = img.width / img.height;
+  let sourceX = 0;
+  let sourceY = 0;
+  let sourceW = img.width;
+  let sourceH = img.height;
+  if (imgRatio > targetRatio) {
+    sourceW = img.height * targetRatio;
+    sourceX = (img.width - sourceW) / 2;
+  } else {
+    sourceH = img.width / targetRatio;
+    sourceY = (img.height - sourceH) / 2;
   }
+
+  ctx.drawImage(img, sourceX, sourceY, sourceW, sourceH, photoX, photoY, photoW, photoH);
+
+  return {
+    dataUrl: canvas.toDataURL('image/png'),
+    aspect: canvas.width / canvas.height,
+    format: 'PNG',
+    alias,
+  };
 };
 
 const renderScriptTextPng = async (
   lines: string[],
   fontSizePx: number,
+  alias: string,
   color = '#E82C8A',
   align: 'left' | 'center' = 'left',
 ): Promise<MeasuredAsset | null> => {
@@ -184,13 +324,20 @@ const renderScriptTextPng = async (
     return {
       dataUrl: canvas.toDataURL('image/png'),
       aspect: canvas.width / Math.max(canvas.height, 1),
+      format: 'PNG',
+      alias,
     };
   } catch {
     return null;
   }
 };
 
-const svgToPng = async (svg: string, width: number, height: number): Promise<string | null> => {
+const svgToPng = async (
+  svg: string,
+  width: number,
+  height: number,
+  alias: string,
+): Promise<MeasuredAsset | null> => {
   const dataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   try {
     const img = await loadImageElement(dataUri);
@@ -200,7 +347,12 @@ const svgToPng = async (svg: string, width: number, height: number): Promise<str
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
     ctx.drawImage(img, 0, 0, width, height);
-    return canvas.toDataURL('image/png');
+    return {
+      dataUrl: canvas.toDataURL('image/png'),
+      aspect: width / Math.max(height, 1),
+      format: 'PNG',
+      alias,
+    };
   } catch {
     return null;
   }
@@ -354,9 +506,9 @@ const drawPlatformInsightSlide = (doc: jsPDF, options: PlatformInsightSlideOptio
   if (options.scriptInsight) {
     const insightTitleH = 21;
     const insightTitleW = insightTitleH * options.scriptInsight.aspect;
-    doc.addImage(
-      options.scriptInsight.dataUrl,
-      'PNG',
+    addMeasuredImage(
+      doc,
+      options.scriptInsight,
       options.titleOffsetX,
       5,
       insightTitleW,
@@ -426,7 +578,7 @@ const drawPlatformInsightSlide = (doc: jsPDF, options: PlatformInsightSlideOptio
       doc.setLineWidth(0.35);
       doc.roundedRect(frameX, frameY, frameW, frameH, 3, 3, 'FD');
 
-      doc.addImage(col.img.dataUrl, 'PNG', frameX + innerPad, frameY + innerPad, drawW, drawH);
+      addMeasuredImage(doc, col.img, frameX + innerPad, frameY + innerPad, drawW, drawH);
     } else {
       doc.setFillColor(...COLORS.white);
       doc.setDrawColor(...COLORS.ink);
@@ -455,7 +607,7 @@ const drawRateCardPackageSlide = (doc: jsPDF, options: RateCardPackageSlideOptio
   if (options.scriptCardSmall) {
     const cardTitleH = 22;
     const cardTitleW = cardTitleH * options.scriptCardSmall.aspect;
-    doc.addImage(options.scriptCardSmall.dataUrl, 'PNG', 43, 7, cardTitleW, cardTitleH);
+    addMeasuredImage(doc, options.scriptCardSmall, 43, 7, cardTitleW, cardTitleH);
   }
 
   doc.setFont('helvetica', 'bold');
@@ -496,9 +648,9 @@ const drawRateCardPackageSlide = (doc: jsPDF, options: RateCardPackageSlideOptio
   if (options.polaroid && availablePolaroidSpace >= 30) {
     const polaroidH = Math.min(44, availablePolaroidSpace);
     const polaroidW = polaroidH * options.polaroid.aspect;
-    doc.addImage(
-      options.polaroid.dataUrl,
-      'PNG',
+    addMeasuredImage(
+      doc,
+      options.polaroid,
       options.polaroidX,
       rightBoxBottomY + 3,
       polaroidW,
@@ -541,120 +693,92 @@ const drawTermColumn = (
   }
 };
 
-export const generateRateCardPdf = async (data: RateCardData): Promise<void> => {
+const composeRateCardPdf = (data: RateCardData, assets: PreparedPdfAssets): jsPDF => {
   const doc = new jsPDF({
     orientation: 'landscape',
     unit: 'mm',
     format: [SLIDE_W, SLIDE_H],
+    compress: true,
   });
 
   const social: SocialHandles = {
     instagramHandle: data.instagramHandle,
     tiktokHandle: data.tiktokHandle,
   };
-
-  const svgMarkup = getRateCardSvgMarkup();
-  const nameLines = (data.name.trim() || 'Nama Kreator').split(/\s+/);
-  const groupedNameLines =
-    nameLines.length > 2 ? [nameLines[0], nameLines.slice(1).join(' ')] : nameLines;
-
-  const [
-    cutout1,
-    cutout2,
-    cutout7,
-    polaroid1,
-    polaroid2,
-    polaroid3,
-    polaroid4,
-    igAccountImg,
-    igInsightImg,
-    ttAccountImg,
-    ttInsightImg,
-    lanyardTopPng,
-    lanyardClipPng,
-    cardsPng,
-    scriptCard,
-    scriptCardSmall,
-    scriptName,
-    scriptHiThere,
-    scriptInsight,
-    scriptCondition,
-    scriptPayment,
-  ] = await Promise.all([
-    loadCutoutPng(data.cutoutSlide1Url),
-    loadCutoutPng(data.cutoutSlide2Url),
-    loadCutoutPng(data.cutoutSlide7Url),
-    createPolaroidPng(data.polaroid1Url, -6),
-    createPolaroidPng(data.polaroid2Url, 6),
-    createPolaroidPng(data.polaroid3Url, -5),
-    createPolaroidPng(data.polaroid4Url, 4),
-    loadCutoutPng(data.igAccountImageUrl),
-    loadCutoutPng(data.igInsightImageUrl),
-    loadCutoutPng(data.tiktokAccountImageUrl),
-    loadCutoutPng(data.tiktokInsightImageUrl),
-    svgToPng(svgMarkup.lanyardTopRight, 160, 260),
-    svgToPng(svgMarkup.lanyardClip, 220, 300),
-    svgToPng(svgMarkup.dualCards, 360, 288),
-    renderScriptTextPng(['Card'], 165, '#E82C8A', 'center'),
-    renderScriptTextPng(['Card'], 105, '#E82C8A', 'left'),
-    renderScriptTextPng(groupedNameLines, 82, '#E82C8A', 'left'),
-    renderScriptTextPng(['Hi there!'], 115, '#E82C8A', 'left'),
-    renderScriptTextPng(['Insight'], 105, '#E82C8A', 'left'),
-    renderScriptTextPng(['Condition'], 105, '#E82C8A', 'left'),
-    renderScriptTextPng(['Payment'], 105, '#E82C8A', 'left'),
-  ]);
+  const displayName = data.name.trim() || 'Bella Rhema Agnesia';
 
   // ==========================================
   // SLIDE 1: COVER RATE CARD
   // ==========================================
   drawPaperBackdrop(doc);
 
-  if (cutout1) {
-    const cutoutHeight = 154;
-    const cutoutWidth = Math.min(cutoutHeight * cutout1.aspect, 96);
-    const drawHeight = cutoutWidth / cutout1.aspect;
-    doc.addImage(cutout1.dataUrl, 'PNG', 12, SLIDE_H - drawHeight, cutoutWidth, drawHeight);
+  if (assets.cutout1) {
+    const cutoutHeight = 160;
+    const cutoutWidth = Math.min(cutoutHeight * assets.cutout1.aspect, 102);
+    const drawHeight = cutoutWidth / assets.cutout1.aspect;
+    addMeasuredImage(doc, assets.cutout1, 6, SLIDE_H - drawHeight, cutoutWidth, drawHeight);
   }
 
-  if (polaroid1) {
-    const polaroidWidth = 56;
-    const polaroidHeight = polaroidWidth / polaroid1.aspect;
-    doc.addImage(polaroid1.dataUrl, 'PNG', 3, 72, polaroidWidth, polaroidHeight);
+  if (assets.polaroid1) {
+    const polaroidWidth = 60;
+    const polaroidHeight = polaroidWidth / assets.polaroid1.aspect;
+    addMeasuredImage(doc, assets.polaroid1, 4, 76, polaroidWidth, polaroidHeight);
   }
 
-  if (scriptName) {
-    const nameHeight = groupedNameLines.length > 1 ? 26 : 16;
-    const nameWidth = nameHeight * scriptName.aspect;
-    doc.addImage(scriptName.dataUrl, 'PNG', 55, 88, Math.min(nameWidth, 62), nameHeight);
-  }
-
+  const coverCenterX = 152;
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(54);
+  doc.setFontSize(50);
   doc.setTextColor(...COLORS.ink);
-  doc.text('RATE', 176, 56, { align: 'center' });
+  doc.text('RATE', coverCenterX, 50, { align: 'center' });
 
-  if (scriptCard) {
-    const scriptHeight = 38;
-    const scriptWidth = scriptHeight * scriptCard.aspect;
-    doc.addImage(scriptCard.dataUrl, 'PNG', 186 - scriptWidth / 2, 48, scriptWidth, scriptHeight);
+  if (assets.scriptCard) {
+    const scriptHeight = 36;
+    const scriptWidth = scriptHeight * assets.scriptCard.aspect;
+    addMeasuredImage(
+      doc,
+      assets.scriptCard,
+      coverCenterX + 4 - scriptWidth / 2,
+      42,
+      scriptWidth,
+      scriptHeight,
+    );
   }
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8.5);
+  doc.setFontSize(10.5);
+  const namePillW = Math.min(Math.max(doc.getTextWidth(displayName) + 14, 42), 88);
+  const namePillH = 8.5;
+  doc.setFillColor(...COLORS.ink);
+  doc.roundedRect(coverCenterX - namePillW / 2, 83, namePillW, namePillH, 4.25, 4.25, 'F');
+  doc.setTextColor(...COLORS.white);
+  doc.text(displayName, coverCenterX, 88.8, { align: 'center' });
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
   doc.setTextColor(...COLORS.ink);
   const tagLines = doc.splitTextToSize(
     (data.tagline.trim() || 'CONTENT CREATOR').toUpperCase(),
-    102,
+    84,
   ) as string[];
-  doc.text(tagLines, 174, 96, { align: 'center' });
+  doc.text(tagLines, coverCenterX, 99, { align: 'center' });
 
-  if (lanyardTopPng) {
-    doc.addImage(lanyardTopPng, 'PNG', 266, 0, 28, 46);
+  if (assets.coverPhoto3) {
+    const w3 = 55;
+    const h3 = w3 / assets.coverPhoto3.aspect;
+    addMeasuredImage(doc, assets.coverPhoto3, 197, 8, w3, h3);
   }
-  if (polaroid2) {
-    const polaroidWidth = 56;
-    const polaroidHeight = polaroidWidth / polaroid2.aspect;
-    doc.addImage(polaroid2.dataUrl, 'PNG', 234, 80, polaroidWidth, polaroidHeight);
+  if (assets.coverPhoto4) {
+    const w4 = 55;
+    const h4 = w4 / assets.coverPhoto4.aspect;
+    addMeasuredImage(doc, assets.coverPhoto4, 238, 12, w4, h4);
+  }
+  if (assets.polaroid2) {
+    const polaroidWidth = 58;
+    const polaroidHeight = polaroidWidth / assets.polaroid2.aspect;
+    addMeasuredImage(doc, assets.polaroid2, 216, 75, polaroidWidth, polaroidHeight);
+  }
+  if (assets.lanyardTopPng) {
+    addMeasuredImage(doc, assets.lanyardTopPng, 272, 0, 22, 36);
   }
 
   drawSocialFooter(doc, social);
@@ -665,10 +789,10 @@ export const generateRateCardPdf = async (data: RateCardData): Promise<void> => 
   doc.addPage();
   drawPaperBackdrop(doc);
 
-  if (scriptHiThere) {
+  if (assets.scriptHiThere) {
     const headingHeight = 24;
-    const headingWidth = headingHeight * scriptHiThere.aspect;
-    doc.addImage(scriptHiThere.dataUrl, 'PNG', 16, 16, headingWidth, headingHeight);
+    const headingWidth = headingHeight * assets.scriptHiThere.aspect;
+    addMeasuredImage(doc, assets.scriptHiThere, 16, 16, headingWidth, headingHeight);
   }
 
   doc.setFont('helvetica', 'bold');
@@ -692,20 +816,20 @@ export const generateRateCardPdf = async (data: RateCardData): Promise<void> => 
     doc.text(bioLines, 18, 86);
   }
 
-  if (cutout2) {
+  if (assets.cutout2) {
     const cutoutHeight = 148;
-    const cutoutWidth = Math.min(cutoutHeight * cutout2.aspect, 90);
-    const drawHeight = cutoutWidth / cutout2.aspect;
-    doc.addImage(cutout2.dataUrl, 'PNG', 202, SLIDE_H - drawHeight, cutoutWidth, drawHeight);
+    const cutoutWidth = Math.min(cutoutHeight * assets.cutout2.aspect, 90);
+    const drawHeight = cutoutWidth / assets.cutout2.aspect;
+    addMeasuredImage(doc, assets.cutout2, 202, SLIDE_H - drawHeight, cutoutWidth, drawHeight);
   }
 
-  if (polaroid3) {
+  if (assets.polaroid3) {
     const polaroidWidth = 62;
-    const polaroidHeight = polaroidWidth / polaroid3.aspect;
-    doc.addImage(polaroid3.dataUrl, 'PNG', 132, 62, polaroidWidth, polaroidHeight);
+    const polaroidHeight = polaroidWidth / assets.polaroid3.aspect;
+    addMeasuredImage(doc, assets.polaroid3, 132, 62, polaroidWidth, polaroidHeight);
   }
-  if (lanyardClipPng) {
-    doc.addImage(lanyardClipPng, 'PNG', 120, 0, 48, 66);
+  if (assets.lanyardClipPng) {
+    addMeasuredImage(doc, assets.lanyardClipPng, 120, 0, 48, 66);
   }
 
   drawSocialFooter(doc, social);
@@ -716,12 +840,12 @@ export const generateRateCardPdf = async (data: RateCardData): Promise<void> => 
   drawPlatformInsightSlide(doc, {
     platformTitle: 'INSTAGRAM',
     titleOffsetX: 68,
-    scriptInsight,
+    scriptInsight: assets.scriptInsight,
     handleText: data.instagramHandle,
     accountLabel: 'AKUN INSTAGRAM',
-    accountImg: igAccountImg,
+    accountImg: assets.igAccountImg,
     insightLabel: 'INSIGHT INSTAGRAM',
-    insightImg: igInsightImg,
+    insightImg: assets.igInsightImg,
     social,
     tintedBg: false,
   });
@@ -732,12 +856,12 @@ export const generateRateCardPdf = async (data: RateCardData): Promise<void> => 
   drawPlatformInsightSlide(doc, {
     platformTitle: 'TIKTOK',
     titleOffsetX: 52,
-    scriptInsight,
+    scriptInsight: assets.scriptInsight,
     handleText: data.tiktokHandle,
     accountLabel: 'AKUN TIKTOK',
-    accountImg: ttAccountImg,
+    accountImg: assets.ttAccountImg,
     insightLabel: 'INSIGHT TIKTOK',
-    insightImg: ttInsightImg,
+    insightImg: assets.ttInsightImg,
     social,
     tintedBg: true,
   });
@@ -752,9 +876,9 @@ export const generateRateCardPdf = async (data: RateCardData): Promise<void> => 
     rightTitle: data.collaborationTitle,
     rightItems: data.collaborationPackages,
     rightBadgeColor: COLORS.pink,
-    polaroid: polaroid4,
+    polaroid: assets.polaroid4,
     polaroidX: 238,
-    scriptCardSmall,
+    scriptCardSmall: assets.scriptCardSmall,
     social,
   });
 
@@ -768,9 +892,9 @@ export const generateRateCardPdf = async (data: RateCardData): Promise<void> => 
     rightTitle: data.additionalTitle,
     rightItems: data.additionalPackages,
     rightBadgeColor: COLORS.ink,
-    polaroid: polaroid2,
+    polaroid: assets.polaroid2,
     polaroidX: 238,
-    scriptCardSmall,
+    scriptCardSmall: assets.scriptCardSmall,
     social,
   });
 
@@ -785,20 +909,20 @@ export const generateRateCardPdf = async (data: RateCardData): Promise<void> => 
   doc.setTextColor(...COLORS.ink);
   doc.text('TERM &', 16, 23);
 
-  if (scriptCondition) {
+  if (assets.scriptCondition) {
     const titleH = 22;
-    const titleW = titleH * scriptCondition.aspect;
-    doc.addImage(scriptCondition.dataUrl, 'PNG', 55, 8, titleW, titleH);
+    const titleW = titleH * assets.scriptCondition.aspect;
+    addMeasuredImage(doc, assets.scriptCondition, 55, 8, titleW, titleH);
   }
 
   drawTermColumn(doc, 'ENDORSEMENT', data.endorsementTerms, 16, 33, 98, COLORS.ink);
   drawTermColumn(doc, 'VISIT', data.visitTerms, 120, 33, 98, COLORS.pink);
 
-  if (cutout7) {
+  if (assets.cutout7) {
     const cutoutHeight = 140;
-    const cutoutWidth = Math.min(cutoutHeight * cutout7.aspect, 66);
-    const drawHeight = cutoutWidth / cutout7.aspect;
-    doc.addImage(cutout7.dataUrl, 'PNG', 226, SLIDE_H - drawHeight, cutoutWidth, drawHeight);
+    const cutoutWidth = Math.min(cutoutHeight * assets.cutout7.aspect, 66);
+    const drawHeight = cutoutWidth / assets.cutout7.aspect;
+    addMeasuredImage(doc, assets.cutout7, 226, SLIDE_H - drawHeight, cutoutWidth, drawHeight);
   }
 
   drawSocialFooter(doc, social);
@@ -814,10 +938,10 @@ export const generateRateCardPdf = async (data: RateCardData): Promise<void> => 
   doc.setTextColor(...COLORS.ink);
   doc.text('TERM OF', 16, 23);
 
-  if (scriptPayment) {
+  if (assets.scriptPayment) {
     const titleH = 22;
-    const titleW = titleH * scriptPayment.aspect;
-    doc.addImage(scriptPayment.dataUrl, 'PNG', 58, 8, titleW, titleH);
+    const titleW = titleH * assets.scriptPayment.aspect;
+    addMeasuredImage(doc, assets.scriptPayment, 58, 8, titleW, titleH);
   }
 
   doc.setFillColor(...COLORS.white);
@@ -860,8 +984,8 @@ export const generateRateCardPdf = async (data: RateCardData): Promise<void> => 
   doc.setLineWidth(0.45);
   doc.roundedRect(135, 36, 142, 62, 3, 3, 'FD');
 
-  if (cardsPng) {
-    doc.addImage(cardsPng, 'PNG', 191, 40, 30, 24);
+  if (assets.cardsPng) {
+    addMeasuredImage(doc, assets.cardsPng, 191, 40, 30, 24);
   }
 
   doc.setFont('helvetica', 'bold');
@@ -906,7 +1030,158 @@ export const generateRateCardPdf = async (data: RateCardData): Promise<void> => 
   }
 
   drawSocialFooter(doc, social);
+  return doc;
+};
+
+export const generateRateCardPdf = async (data: RateCardData): Promise<void> => {
+  const svgMarkup = getRateCardSvgMarkup();
+
+  const [
+    cutout1El,
+    cutout2El,
+    cutout7El,
+    polaroid1El,
+    polaroid2El,
+    coverPhoto3El,
+    coverPhoto4El,
+    polaroid3El,
+    polaroid4El,
+    igAccountEl,
+    igInsightEl,
+    ttAccountEl,
+    ttInsightEl,
+    lanyardTopPng,
+    lanyardClipPng,
+    cardsPng,
+    scriptCard,
+    scriptCardSmall,
+    scriptHiThere,
+    scriptInsight,
+    scriptCondition,
+    scriptPayment,
+  ] = await Promise.all([
+    tryLoadImage(data.cutoutSlide1Url),
+    tryLoadImage(data.cutoutSlide2Url),
+    tryLoadImage(data.cutoutSlide7Url),
+    tryLoadImage(data.polaroid1Url),
+    tryLoadImage(data.polaroid2Url),
+    tryLoadImage(data.coverPhoto3Url),
+    tryLoadImage(data.coverPhoto4Url),
+    tryLoadImage(data.polaroid3Url),
+    tryLoadImage(data.polaroid4Url),
+    tryLoadImage(data.igAccountImageUrl),
+    tryLoadImage(data.igInsightImageUrl),
+    tryLoadImage(data.tiktokAccountImageUrl),
+    tryLoadImage(data.tiktokInsightImageUrl),
+    svgToPng(svgMarkup.lanyardTopRight, 160, 260, 'lanyard-top'),
+    svgToPng(svgMarkup.lanyardClip, 220, 300, 'lanyard-clip'),
+    svgToPng(svgMarkup.dualCards, 360, 288, 'dual-cards'),
+    renderScriptTextPng(['Card'], 155, 'script-card', '#E82C8A', 'center'),
+    renderScriptTextPng(['Card'], 105, 'script-card-small', '#E82C8A', 'left'),
+    renderScriptTextPng(['Hi there!'], 115, 'script-hi-there', '#E82C8A', 'left'),
+    renderScriptTextPng(['Insight'], 105, 'script-insight', '#E82C8A', 'left'),
+    renderScriptTextPng(['Condition'], 105, 'script-condition', '#E82C8A', 'left'),
+    renderScriptTextPng(['Payment'], 105, 'script-payment', '#E82C8A', 'left'),
+  ]);
+
+  let finalDoc: jsPDF | null = null;
+
+  for (const preset of PDF_COMPRESSION_PRESETS) {
+    const assets: PreparedPdfAssets = {
+      cutout1: encodeCutoutPng(cutout1El, 'cutout-1', preset.cutoutMaxDim),
+      cutout2: encodeCutoutPng(cutout2El, 'cutout-2', preset.cutoutMaxDim),
+      cutout7: encodeCutoutPng(cutout7El, 'cutout-7', preset.cutoutMaxDim),
+      polaroid1: createPolaroidPng(
+        polaroid1El,
+        'polaroid-1',
+        -6,
+        preset.polaroidFrameW,
+        preset.polaroidFrameH,
+        preset.polaroidPad,
+      ),
+      polaroid2: createPolaroidPng(
+        polaroid2El,
+        'polaroid-2',
+        2,
+        preset.polaroidFrameW,
+        preset.polaroidFrameH,
+        preset.polaroidPad,
+      ),
+      coverPhoto3: createPolaroidPng(
+        coverPhoto3El,
+        'cover-photo-3',
+        -6,
+        preset.polaroidFrameW,
+        preset.polaroidFrameH,
+        preset.polaroidPad,
+      ),
+      coverPhoto4: createPolaroidPng(
+        coverPhoto4El,
+        'cover-photo-4',
+        6,
+        preset.polaroidFrameW,
+        preset.polaroidFrameH,
+        preset.polaroidPad,
+      ),
+      polaroid3: createPolaroidPng(
+        polaroid3El,
+        'polaroid-3',
+        -5,
+        preset.polaroidFrameW,
+        preset.polaroidFrameH,
+        preset.polaroidPad,
+      ),
+      polaroid4: createPolaroidPng(
+        polaroid4El,
+        'polaroid-4',
+        4,
+        preset.polaroidFrameW,
+        preset.polaroidFrameH,
+        preset.polaroidPad,
+      ),
+      igAccountImg: encodeScreenshotJpeg(
+        igAccountEl,
+        'ig-account',
+        preset.screenshotMaxDim,
+        preset.screenshotQuality,
+      ),
+      igInsightImg: encodeScreenshotJpeg(
+        igInsightEl,
+        'ig-insight',
+        preset.screenshotMaxDim,
+        preset.screenshotQuality,
+      ),
+      ttAccountImg: encodeScreenshotJpeg(
+        ttAccountEl,
+        'tt-account',
+        preset.screenshotMaxDim,
+        preset.screenshotQuality,
+      ),
+      ttInsightImg: encodeScreenshotJpeg(
+        ttInsightEl,
+        'tt-insight',
+        preset.screenshotMaxDim,
+        preset.screenshotQuality,
+      ),
+      lanyardTopPng,
+      lanyardClipPng,
+      cardsPng,
+      scriptCard,
+      scriptCardSmall,
+      scriptHiThere,
+      scriptInsight,
+      scriptCondition,
+      scriptPayment,
+    };
+
+    const candidateDoc = composeRateCardPdf(data, assets);
+    finalDoc = candidateDoc;
+    const sizeBytes = candidateDoc.output('arraybuffer').byteLength;
+    if (sizeBytes <= TARGET_MAX_PDF_BYTES) {
+      break;
+    }
+  }
 
   const safeName = (data.name.trim() || 'Rate_Card').replace(/[^a-zA-Z0-9_-]+/g, '_');
-  doc.save(`${safeName}_Rate_Card.pdf`);
+  finalDoc?.save(`${safeName}_Rate_Card.pdf`);
 };

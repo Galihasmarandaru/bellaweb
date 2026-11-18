@@ -1,5 +1,5 @@
-import { Download, Loader2, RotateCcw } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { CheckCircle2, CloudOff, Download, Loader2, RotateCcw, Save } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,15 +15,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { fileToCompressedDataUrl } from '@/shared/utils/compressImage';
+import { useRateCard, useSaveRateCard, useUploadRateCardImage } from '../hooks/useRateCard';
+import { rateCardService } from '../services/rateCardService';
 import type { RateCardData, RatePackageItem } from '../types/rateCard.types';
 import { DEFAULT_IMAGES, DEFAULT_RATE_CARD_DATA } from '../utils/defaultRateCard';
 import { generateRateCardPdf } from '../utils/generateRateCardPdf';
-import { loadRateCardData, saveRateCardData } from '../utils/rateCardStorage';
 import { PackageSectionEditor } from './PackageSectionEditor';
 import { PhotoSlotCard } from './PhotoSlotCard';
 import { RateCardPreview } from './RateCardPreview';
 import { TermListEditor } from './TermListEditor';
+import { WhatsAppShareDialog } from './WhatsAppShareDialog';
 
 type EditorTab = 'identity' | 'insights' | 'rate' | 'photos' | 'terms' | 'payment';
 type TermListKey = 'endorsementTerms' | 'visitTerms' | 'paymentTerms';
@@ -39,12 +40,16 @@ type ImageFieldKey =
   | 'cutoutSlide7Url'
   | 'polaroid1Url'
   | 'polaroid2Url'
+  | 'coverPhoto3Url'
+  | 'coverPhoto4Url'
   | 'polaroid3Url'
   | 'polaroid4Url'
   | 'igAccountImageUrl'
   | 'igInsightImageUrl'
   | 'tiktokAccountImageUrl'
   | 'tiktokInsightImageUrl';
+
+const AUTO_SAVE_DEBOUNCE_MS = 800;
 
 const EDITOR_TABS: ReadonlyArray<{ id: EditorTab; label: string }> = [
   { id: 'identity', label: '1. Cover & Bio' },
@@ -111,34 +116,40 @@ const PORTFOLIO_PHOTO_SLOTS: ReadonlyArray<{
     hint: 'PNG transparan tanpa background (IMG_7387)',
   },
   {
+    field: 'polaroid1Url',
+    defaultUrl: DEFAULT_IMAGES.polaroid1,
+    label: 'Polaroid 1 (Cover Kiri)',
+    hint: 'Foto polaroid kiri Slide 1 (IMG_6077)',
+  },
+  {
+    field: 'coverPhoto3Url',
+    defaultUrl: DEFAULT_IMAGES.coverPhoto3,
+    label: 'Cover Polaroid 3 (Kanan Atas)',
+    hint: 'Foto kolase kanan atas Slide 1 (IMG_6364)',
+  },
+  {
+    field: 'coverPhoto4Url',
+    defaultUrl: DEFAULT_IMAGES.coverPhoto4,
+    label: 'Cover Polaroid 4 (Kanan Tengah)',
+    hint: 'Foto kolase kanan tengah Slide 1 (IMG_0242)',
+  },
+  {
+    field: 'polaroid2Url',
+    defaultUrl: DEFAULT_IMAGES.polaroid2,
+    label: 'Polaroid 2 (Cover Kanan Bawah & Slide 6)',
+    hint: 'Foto polaroid miring kanan bawah Slide 1 (IMG_1413)',
+  },
+  {
     field: 'cutoutSlide2Url',
     defaultUrl: DEFAULT_IMAGES.cutoutSlide2,
     label: 'Cutout Slide 2 (About Kanan)',
     hint: 'PNG transparan tanpa background (IMG_6077)',
   },
   {
-    field: 'cutoutSlide7Url',
-    defaultUrl: DEFAULT_IMAGES.cutoutSlide7,
-    label: 'Cutout Slide 7 (T&C Kanan)',
-    hint: 'PNG transparan tanpa background (IMG_1413)',
-  },
-  {
-    field: 'polaroid1Url',
-    defaultUrl: DEFAULT_IMAGES.polaroid1,
-    label: 'Polaroid 1 (Cover Kiri)',
-    hint: 'Foto kartu polaroid Slide 1 (IMG_6077)',
-  },
-  {
-    field: 'polaroid2Url',
-    defaultUrl: DEFAULT_IMAGES.polaroid2,
-    label: 'Polaroid 2 (Cover Kanan & Slide 6)',
-    hint: 'Foto kartu polaroid miring (IMG_1413)',
-  },
-  {
     field: 'polaroid3Url',
     defaultUrl: DEFAULT_IMAGES.polaroid3,
     label: 'Polaroid 3 (Lanyard Slide 2)',
-    hint: 'Foto tergantung di klip lanyard (IMG_0241)',
+    hint: 'Foto tergantung di klip lanyard',
   },
   {
     field: 'polaroid4Url',
@@ -146,33 +157,91 @@ const PORTFOLIO_PHOTO_SLOTS: ReadonlyArray<{
     label: 'Polaroid 4 (Slide 5 Kanan)',
     hint: 'Foto kartu polaroid Slide 5 (IMG_7387)',
   },
+  {
+    field: 'cutoutSlide7Url',
+    defaultUrl: DEFAULT_IMAGES.cutoutSlide7,
+    label: 'Cutout Slide 7 (T&C Kanan)',
+    hint: 'PNG transparan tanpa background (IMG_1413)',
+  },
 ];
 
 export function RateCardGenerator() {
+  const rateCardQuery = useRateCard();
+  const saveMutation = useSaveRateCard();
+  const uploadMutation = useUploadRateCardImage();
+
   const [data, setData] = useState<RateCardData>(DEFAULT_RATE_CARD_DATA);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasHydratedFromDb, setHasHydratedFromDb] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
   const [activeTab, setActiveTab] = useState<EditorTab>('identity');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadingField, setUploadingField] = useState<ImageFieldKey | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [isWaDialogOpen, setIsWaDialogOpen] = useState(false);
+
+  const debounceTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
-    loadRateCardData().then((hydrated) => {
-      setData(hydrated);
-      setIsLoaded(true);
-    });
-  }, []);
+    if (rateCardQuery.data && !hasHydratedFromDb) {
+      setData(rateCardQuery.data);
+      setHasHydratedFromDb(true);
+    }
+  }, [rateCardQuery.data, hasHydratedFromDb]);
 
   useEffect(() => {
-    if (!isLoaded) return;
-    void saveRateCardData(data);
-  }, [data, isLoaded]);
+    if (!hasHydratedFromDb || !isDirty) return;
+
+    if (debounceTimerRef.current) {
+      window.clearTimeout(debounceTimerRef.current);
+    }
+
+    debounceTimerRef.current = window.setTimeout(() => {
+      setSyncError(null);
+      saveMutation.mutate(data, {
+        onSuccess: () => setIsDirty(false),
+        onError: (err) => {
+          setSyncError(err instanceof Error ? err.message : 'Gagal menyimpan ke database.');
+        },
+      });
+    }, AUTO_SAVE_DEBOUNCE_MS);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        window.clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [data, hasHydratedFromDb, isDirty, saveMutation.mutate]);
+
+  const clearPendingAutoSave = (): void => {
+    if (debounceTimerRef.current) {
+      window.clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+  };
+
+  const persistImmediately = async (nextData: RateCardData): Promise<void> => {
+    clearPendingAutoSave();
+    setSyncError(null);
+    setData(nextData);
+    setIsDirty(false);
+    try {
+      await saveMutation.mutateAsync(nextData);
+    } catch (err) {
+      setSyncError(err instanceof Error ? err.message : 'Gagal menyimpan ke database.');
+    }
+  };
+
+  const updateDraft = (updater: (prev: RateCardData) => RateCardData): void => {
+    setData((prev) => updater(prev));
+    setIsDirty(true);
+  };
 
   const updateField = <K extends keyof RateCardData>(field: K, value: RateCardData[K]): void => {
-    setData((prev) => ({ ...prev, [field]: value }));
+    updateDraft((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleAddPackage = (listKey: PackageListKey): void => {
-    setData((prev) => ({
+    updateDraft((prev) => ({
       ...prev,
       [listKey]: [
         ...prev[listKey],
@@ -182,7 +251,7 @@ export function RateCardGenerator() {
   };
 
   const handleRemovePackage = (listKey: PackageListKey, id: string): void => {
-    setData((prev) => ({
+    updateDraft((prev) => ({
       ...prev,
       [listKey]: prev[listKey].filter((item) => item.id !== id),
     }));
@@ -194,28 +263,28 @@ export function RateCardGenerator() {
     field: keyof RatePackageItem,
     value: string,
   ): void => {
-    setData((prev) => ({
+    updateDraft((prev) => ({
       ...prev,
       [listKey]: prev[listKey].map((item) => (item.id === id ? { ...item, [field]: value } : item)),
     }));
   };
 
   const handleAddTerm = (listKey: TermListKey): void => {
-    setData((prev) => ({
+    updateDraft((prev) => ({
       ...prev,
       [listKey]: [...prev[listKey], { id: `${listKey}-${Date.now()}`, text: '' }],
     }));
   };
 
   const handleUpdateTerm = (listKey: TermListKey, id: string, value: string): void => {
-    setData((prev) => ({
+    updateDraft((prev) => ({
       ...prev,
       [listKey]: prev[listKey].map((item) => (item.id === id ? { ...item, text: value } : item)),
     }));
   };
 
   const handleRemoveTerm = (listKey: TermListKey, id: string): void => {
-    setData((prev) => ({
+    updateDraft((prev) => ({
       ...prev,
       [listKey]: prev[listKey].filter((item) => item.id !== id),
     }));
@@ -223,59 +292,134 @@ export function RateCardGenerator() {
 
   const handleImageUpload = async (field: ImageFieldKey, file?: File): Promise<void> => {
     if (!file) return;
-    setIsUploadingImage(true);
+    setSyncError(null);
+    setUploadingField(field);
     try {
-      const dataUrl = await fileToCompressedDataUrl(file);
-      updateField(field, dataUrl);
-    } catch (error) {
-      console.error('Failed to process image:', error);
+      const publicUrl = await uploadMutation.mutateAsync({
+        file,
+        previousUrl: data[field],
+      });
+      const nextData: RateCardData = { ...data, [field]: publicUrl };
+      await persistImmediately(nextData);
+    } catch (err) {
+      setSyncError(
+        err instanceof Error ? err.message : 'Gagal mengupload gambar ke Supabase Storage.',
+      );
     } finally {
-      setIsUploadingImage(false);
+      setUploadingField(null);
     }
+  };
+
+  const handleImageReset = async (field: ImageFieldKey, defaultUrl: string): Promise<void> => {
+    const previousUrl = data[field];
+    const nextData: RateCardData = { ...data, [field]: defaultUrl };
+    await persistImmediately(nextData);
+    await rateCardService.deleteImage(previousUrl);
+  };
+
+  const handleResetAllDefault = async (): Promise<void> => {
+    const allCurrentImageUrls = [
+      ...INSIGHT_PHOTO_SLOTS.map((slot) => data[slot.field]),
+      ...PORTFOLIO_PHOTO_SLOTS.map((slot) => data[slot.field]),
+    ];
+    await persistImmediately(DEFAULT_RATE_CARD_DATA);
+    await Promise.all(allCurrentImageUrls.map((url) => rateCardService.deleteImage(url)));
+  };
+
+  const handleManualSave = async (): Promise<void> => {
+    await persistImmediately(data);
   };
 
   const handleDownloadPdf = async (): Promise<void> => {
     setIsGenerating(true);
     try {
       await generateRateCardPdf(data);
+      setIsWaDialogOpen(true);
     } finally {
       setIsGenerating(false);
     }
   };
+
+  const loadErrorMessage =
+    rateCardQuery.error instanceof Error ? rateCardQuery.error.message : null;
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
       <Card className="lg:col-span-5">
         <CardHeader className="flex flex-col gap-4 border-b pb-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <CardTitle className="text-[#232220] text-lg">Input Rate Card</CardTitle>
-            <AlertDialog>
-              <AlertDialogTrigger
-                render={
-                  <Button type="button" variant="outline" size="sm" className="h-8 text-xs">
-                    <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Reset Default
-                  </Button>
-                }
-              />
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Reset ke template default?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Semua perubahan teks, harga, dan foto akan dikembalikan ke template awal.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Batal</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => setData(DEFAULT_RATE_CARD_DATA)}
-                    className="bg-[#E82C8A] text-white hover:bg-[#d1227a]"
-                  >
-                    Ya, Reset
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <div className="flex flex-col gap-1">
+              <CardTitle className="text-[#232220] text-lg">Input Rate Card</CardTitle>
+              <div className="flex items-center gap-1.5 text-xs">
+                {rateCardQuery.isLoading ? (
+                  <span className="inline-flex items-center gap-1 text-slate-500">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Memuat dari database...
+                  </span>
+                ) : saveMutation.isPending || uploadingField ? (
+                  <span className="inline-flex items-center gap-1 text-[#1b3b2c]">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    {uploadingField ? 'Mengupload foto...' : 'Menyimpan ke database...'}
+                  </span>
+                ) : syncError || loadErrorMessage ? (
+                  <span className="inline-flex items-center gap-1 text-red-600">
+                    <CloudOff className="h-3 w-3" /> Gagal sinkron ke database
+                  </span>
+                ) : isDirty ? (
+                  <span className="text-amber-600">Menunggu sinkronisasi...</span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-emerald-700">
+                    <CheckCircle2 className="h-3 w-3" /> Tersimpan di database
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs"
+                disabled={saveMutation.isPending || rateCardQuery.isLoading}
+                onClick={handleManualSave}
+              >
+                <Save className="mr-1.5 h-3.5 w-3.5" /> Simpan
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger
+                  render={
+                    <Button type="button" variant="outline" size="sm" className="h-8 text-xs">
+                      <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Reset Default
+                    </Button>
+                  }
+                />
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Reset ke template default?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Semua perubahan teks, harga, dan foto di database akan dikembalikan ke
+                      template awal.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Batal</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleResetAllDefault}
+                      className="bg-[#E82C8A] text-white hover:bg-[#d1227a]"
+                    >
+                      Ya, Reset
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
           </div>
+
+          {loadErrorMessage || syncError ? (
+            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-red-700 text-xs">
+              {syncError || loadErrorMessage}
+            </div>
+          ) : null}
 
           <div className="flex flex-wrap gap-1.5">
             {EDITOR_TABS.map((tab) => (
@@ -302,13 +446,13 @@ export function RateCardGenerator() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
                 <label htmlFor="rc-name" className="font-semibold text-xs uppercase">
-                  Nama Lengkap (Script Pink)
+                  Nama Lengkap (Di bawah Rate Card)
                 </label>
                 <Input
                   id="rc-name"
                   value={data.name}
                   onChange={(e) => updateField('name', e.target.value)}
-                  placeholder="Bella Rhema"
+                  placeholder="Bella Rhema Agnesia"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -379,9 +523,9 @@ export function RateCardGenerator() {
                   hint={slot.hint}
                   imageUrl={data[slot.field]}
                   defaultUrl={slot.defaultUrl}
-                  isUploading={isUploadingImage}
-                  onUpload={(file) => handleImageUpload(slot.field, file)}
-                  onReset={() => updateField(slot.field, slot.defaultUrl)}
+                  isUploading={uploadingField === slot.field}
+                  onUpload={(file) => void handleImageUpload(slot.field, file)}
+                  onReset={() => void handleImageReset(slot.field, slot.defaultUrl)}
                 />
               ))}
             </div>
@@ -415,9 +559,9 @@ export function RateCardGenerator() {
                   hint={slot.hint}
                   imageUrl={data[slot.field]}
                   defaultUrl={slot.defaultUrl}
-                  isUploading={isUploadingImage}
-                  onUpload={(file) => handleImageUpload(slot.field, file)}
-                  onReset={() => updateField(slot.field, slot.defaultUrl)}
+                  isUploading={uploadingField === slot.field}
+                  onUpload={(file) => void handleImageUpload(slot.field, file)}
+                  onReset={() => void handleImageReset(slot.field, slot.defaultUrl)}
                 />
               ))}
             </div>
@@ -554,6 +698,8 @@ export function RateCardGenerator() {
           <RateCardPreview data={data} />
         </Card>
       </div>
+
+      <WhatsAppShareDialog open={isWaDialogOpen} onOpenChange={setIsWaDialogOpen} />
     </div>
   );
 }

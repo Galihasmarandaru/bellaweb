@@ -43,6 +43,8 @@ export interface RateCardData extends SocialHandles {
   cutoutSlide7Url: string;
   polaroid1Url: string;
   polaroid2Url: string;
+  coverPhoto3Url: string;
+  coverPhoto4Url: string;
   polaroid3Url: string;
   polaroid4Url: string;
   igAccountImageUrl: string;

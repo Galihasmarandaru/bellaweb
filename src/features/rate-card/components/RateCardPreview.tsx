@@ -333,7 +333,7 @@ function TermListPreviewColumn({
 export function RateCardPreview({ data }: RateCardPreviewProps) {
   const [activePage, setActivePage] = useState<PreviewPageFilter>('all');
 
-  const displayName = data.name.trim() || 'Bella Rhema';
+  const displayName = data.name.trim() || 'Bella Rhema Agnesia';
   const shortName = (data.shortName.trim() || displayName).toUpperCase();
   const social: SocialHandles = {
     instagramHandle: data.instagramHandle,
@@ -368,51 +368,57 @@ export function RateCardPreview({ data }: RateCardPreviewProps) {
         {/* SLIDE 1: COVER RATE CARD */}
         {(activePage === 'all' || activePage === '1') && (
           <RateCardSlideFrame social={social}>
-            <LanyardTopRightSvg className="pointer-events-none absolute top-0 right-1 z-20 h-20 w-12" />
+            <LanyardTopRightSvg className="pointer-events-none absolute top-0 right-1 z-40 h-16 w-10" />
 
             {data.cutoutSlide1Url ? (
               <img
                 src={data.cutoutSlide1Url}
                 alt={displayName}
-                className="pointer-events-none absolute bottom-0 left-3 z-10 h-[90%] w-auto object-contain"
+                className="pointer-events-none absolute bottom-0 left-1 z-10 h-[95%] w-auto object-contain"
               />
             ) : null}
 
             <PolaroidCard
               src={data.polaroid1Url}
               alt="Polaroid 1"
-              className="absolute bottom-7 left-2 z-20 w-[18%] -rotate-6"
+              className="absolute bottom-6 left-2 z-20 w-[20%] -rotate-6"
             />
 
-            <div
-              className="pointer-events-none absolute top-[54%] left-[19%] z-20 -rotate-3 text-[#E82C8A] text-xl leading-[0.85] sm:text-2xl"
-              style={{ fontFamily: SCRIPT_FONT }}
-            >
-              {displayName}
-            </div>
-
-            <div className="relative z-10 my-auto ml-[34%] flex w-[46%] flex-col items-center text-center">
+            <div className="relative z-20 my-auto ml-[31%] flex w-[36%] flex-col items-center text-center">
               <h2
-                className="font-black text-4xl text-[#232220] tracking-tight sm:text-6xl"
+                className="font-black text-4xl text-[#232220] tracking-tight sm:text-5xl"
                 style={{ fontFamily: DISPLAY_FONT }}
               >
                 RATE
               </h2>
               <span
-                className="-mt-4 -rotate-3 text-4xl text-[#E82C8A] leading-none sm:-mt-5 sm:text-6xl"
+                className="-mt-3.5 -rotate-3 text-4xl text-[#E82C8A] leading-none sm:-mt-4.5 sm:text-5xl"
                 style={{ fontFamily: SCRIPT_FONT }}
               >
                 Card
               </span>
-              <p className="mt-2 max-w-[92%] font-bold text-[#232220] text-[7px] uppercase tracking-wider sm:text-[8.5px]">
+              <div className="mt-1.5 inline-flex max-w-full rounded-full bg-[#232220] px-3 py-0.5 font-bold text-[8.5px] text-white tracking-wider sm:text-[10px]">
+                <span className="truncate">{displayName}</span>
+              </div>
+              <p className="mt-2 max-w-[95%] font-bold text-[#232220] text-[6.5px] uppercase tracking-wider sm:text-[8px]">
                 {data.tagline || 'CONTENT CREATOR'}
               </p>
             </div>
 
             <PolaroidCard
+              src={data.coverPhoto3Url}
+              alt="Cover Foto 3"
+              className="absolute top-3 right-[14.5%] z-10 w-[18.5%] -rotate-6"
+            />
+            <PolaroidCard
+              src={data.coverPhoto4Url}
+              alt="Cover Foto 4"
+              className="absolute top-5 right-2 z-20 w-[18.5%] rotate-6"
+            />
+            <PolaroidCard
               src={data.polaroid2Url}
               alt="Polaroid 2"
-              className="absolute right-3 bottom-7 z-20 w-[18%] rotate-6"
+              className="absolute right-[7.5%] bottom-6 z-30 w-[20%] rotate-2"
             />
           </RateCardSlideFrame>
         )}
