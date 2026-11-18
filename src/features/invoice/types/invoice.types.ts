@@ -19,6 +19,12 @@ export interface InvoiceItem {
   jml: number;
 }
 
+export interface InvoiceTaxItem {
+  id: string;
+  name: string;
+  rateInput: string;
+}
+
 export interface InvoiceFormState {
   kepada: string;
   tanggalIso: string;
@@ -26,6 +32,12 @@ export interface InvoiceFormState {
   noInvoiceDateIso: string;
   hasCustomNoInvoiceDate: boolean;
   items: InvoiceItem[];
+  taxes: InvoiceTaxItem[];
+}
+
+export interface InvoicePdfTaxLine {
+  detailLabel: string;
+  amount: number;
 }
 
 export interface InvoicePdfData {
@@ -33,4 +45,5 @@ export interface InvoicePdfData {
   tanggal: string;
   noInvoice: string;
   items: InvoiceItem[];
+  taxes: InvoicePdfTaxLine[];
 }

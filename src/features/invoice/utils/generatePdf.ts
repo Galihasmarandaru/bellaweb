@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { InvoicePdfData } from '../types/invoice.types';
+import { formatInvoiceRp } from './invoiceTax';
 
 interface JsPdfWithAutoTable extends jsPDF {
   lastAutoTable?: {
@@ -8,7 +9,7 @@ interface JsPdfWithAutoTable extends jsPDF {
   };
 }
 
-export const generatePdf = (data: InvoicePdfData, subTotal: number) => {
+export const generatePdf = (data: InvoicePdfData, subTotal: number, grandTotal: number) => {
   const doc: JsPdfWithAutoTable = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -95,19 +96,42 @@ export const generatePdf = (data: InvoicePdfData, subTotal: number) => {
   doc.text('No Rek : 0091816716 (BCA)', 15, finalY + 12);
 
   // Totals
+  const subTotalText = formatInvoiceRp(subTotal);
+  const totalText = formatInvoiceRp(grandTotal);
+  const taxDisplayLines = data.taxes.length > 0 ? data.taxes.map((tax) => tax.detailLabel) : ['-'];
+
   doc.setFont('helvetica', 'normal');
-  doc.text('SUB TOTAL :', 145, finalY, { align: 'right' });
-  doc.text(`RP ${subTotal.toLocaleString('id-ID')}`, 195, finalY, { align: 'right' });
-
-  doc.text('PAJAK :', 145, finalY + 6, { align: 'right' });
-  doc.text('-', 195, finalY + 6, { align: 'right' });
-
+  const normalMaxWidth = Math.max(
+    doc.getTextWidth(subTotalText),
+    ...taxDisplayLines.map((line) => doc.getTextWidth(line)),
+  );
   doc.setFont('helvetica', 'bold');
-  doc.text('TOTAL :', 145, finalY + 14, { align: 'right' });
-  doc.text(`RP ${subTotal.toLocaleString('id-ID')}`, 195, finalY + 14, { align: 'right' });
+  const boldTotalWidth = doc.getTextWidth(totalText);
+  const maxValueWidth = Math.max(normalMaxWidth, boldTotalWidth);
+
+  const labelX = Math.max(92, Math.min(145, 195 - maxValueWidth - 4));
+  const maxTaxValueWidth = 195 - labelX - 4;
+  doc.setFont('helvetica', 'normal');
+  const wrappedTaxLines = taxDisplayLines.flatMap(
+    (line) => doc.splitTextToSize(line, maxTaxValueWidth) as string[],
+  );
+
+  doc.text('SUB TOTAL :', labelX, finalY, { align: 'right' });
+  doc.text(subTotalText, 195, finalY, { align: 'right' });
+
+  const taxStartY = finalY + 6;
+  doc.text('PAJAK :', labelX, taxStartY, { align: 'right' });
+  wrappedTaxLines.forEach((line, index) => {
+    doc.text(line, 195, taxStartY + index * 6, { align: 'right' });
+  });
+
+  const totalY = taxStartY + wrappedTaxLines.length * 6 + 2;
+  doc.setFont('helvetica', 'bold');
+  doc.text('TOTAL :', labelX, totalY, { align: 'right' });
+  doc.text(totalText, 195, totalY, { align: 'right' });
 
   // 5. Signature Section
-  const signatureY = finalY + 50;
+  const signatureY = Math.max(finalY + 50, totalY + 36);
   doc.setFont('helvetica', 'bold');
   doc.text('TERIMAKASIH ATAS', 15, signatureY);
   doc.text('KERJASAMA ANDA', 15, signatureY + 5);

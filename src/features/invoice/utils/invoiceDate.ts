@@ -1,4 +1,4 @@
-import type { InvoiceFormState, InvoiceItem } from '../types/invoice.types';
+import type { InvoiceFormState, InvoiceItem, InvoiceTaxItem } from '../types/invoice.types';
 
 const INDONESIAN_MONTHS: Record<string, number> = {
   januari: 0,
@@ -100,7 +100,20 @@ export function createDefaultInvoiceState(): InvoiceFormState {
     noInvoiceDateIso: todayIso,
     hasCustomNoInvoiceDate: false,
     items: [{ id: Date.now().toString(), keterangan: '', harga: 0, jml: 1 }],
+    taxes: [],
   };
+}
+
+function normalizeStoredTaxes(rawTaxes: unknown): InvoiceTaxItem[] {
+  if (!Array.isArray(rawTaxes)) return [];
+  return rawTaxes.map((tax, idx) => {
+    const record = tax && typeof tax === 'object' ? (tax as Record<string, unknown>) : {};
+    return {
+      id: typeof record.id === 'string' && record.id ? record.id : `${Date.now()}-tax-${idx}`,
+      name: typeof record.name === 'string' ? record.name : '',
+      rateInput: typeof record.rateInput === 'string' ? record.rateInput : '',
+    };
+  });
 }
 
 export function normalizeStoredInvoiceState(raw: unknown): InvoiceFormState | null {
@@ -117,6 +130,7 @@ export function normalizeStoredInvoiceState(raw: unknown): InvoiceFormState | nu
           jml: typeof item?.jml === 'number' && !Number.isNaN(item.jml) ? item.jml : 1,
         }))
       : [{ id: Date.now().toString(), keterangan: '', harga: 0, jml: 1 }];
+  const taxes = normalizeStoredTaxes(record.taxes);
 
   if (typeof record.tanggalIso === 'string' && parseIsoDateString(record.tanggalIso)) {
     const tanggalIso = record.tanggalIso;
@@ -131,6 +145,7 @@ export function normalizeStoredInvoiceState(raw: unknown): InvoiceFormState | nu
       noInvoiceDateIso,
       hasCustomNoInvoiceDate: Boolean(record.hasCustomNoInvoiceDate),
       items,
+      taxes,
     };
   }
 
@@ -149,5 +164,6 @@ export function normalizeStoredInvoiceState(raw: unknown): InvoiceFormState | nu
     noInvoiceDateIso: legacyNo.dateIso,
     hasCustomNoInvoiceDate: legacyNo.dateIso !== tanggalIso,
     items,
+    taxes,
   };
 }

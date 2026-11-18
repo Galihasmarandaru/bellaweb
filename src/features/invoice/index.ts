@@ -5,5 +5,7 @@ export type {
   InvoiceItem,
   InvoiceItemTemplate,
   InvoicePdfData,
+  InvoicePdfTaxLine,
   InvoiceRecipient,
+  InvoiceTaxItem,
 } from './types/invoice.types';

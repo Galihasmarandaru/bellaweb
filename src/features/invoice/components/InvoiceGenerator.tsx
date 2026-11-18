@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useInvoiceItemTemplates, useInvoiceRecipients } from '../hooks/useInvoiceOptions';
-import type { InvoiceFormState, InvoiceItem } from '../types/invoice.types';
+import type { InvoiceFormState, InvoiceItem, InvoiceTaxItem } from '../types/invoice.types';
 import { generatePdf } from '../utils/generatePdf';
 import {
   createDefaultInvoiceState,
@@ -14,6 +14,11 @@ import {
   formatShortSlashDate,
   normalizeStoredInvoiceState,
 } from '../utils/invoiceDate';
+import {
+  computeInvoiceTaxSummary,
+  formatInvoiceRp,
+  sanitizeTaxRateInput,
+} from '../utils/invoiceTax';
 import { EditableOptionPicker, type SelectableOption } from './EditableOptionPicker';
 import { InvoiceDatePicker } from './InvoiceDatePicker';
 
@@ -85,6 +90,11 @@ export function InvoiceGenerator() {
     [data.items],
   );
 
+  const taxSummary = useMemo(
+    () => computeInvoiceTaxSummary(subTotal, data.taxes),
+    [subTotal, data.taxes],
+  );
+
   const handleKepadaChange = (value: string) => {
     setData((prev) => ({ ...prev, kepada: value }));
   };
@@ -143,6 +153,40 @@ export function InvoiceGenerator() {
     handleItemChange(id, field, digitsOnly ? Number(digitsOnly) : 0);
   };
 
+  const handleAddTax = () => {
+    const newTax: InvoiceTaxItem = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name: '',
+      rateInput: '',
+    };
+    setData((prev) => ({
+      ...prev,
+      taxes: [...prev.taxes, newTax],
+    }));
+  };
+
+  const handleRemoveTax = (id: string) => {
+    setData((prev) => ({
+      ...prev,
+      taxes: prev.taxes.filter((tax) => tax.id !== id),
+    }));
+  };
+
+  const handleTaxNameChange = (id: string, value: string) => {
+    setData((prev) => ({
+      ...prev,
+      taxes: prev.taxes.map((tax) => (tax.id === id ? { ...tax, name: value } : tax)),
+    }));
+  };
+
+  const handleTaxRateChange = (id: string, rawValue: string) => {
+    const sanitized = sanitizeTaxRateInput(rawValue);
+    setData((prev) => ({
+      ...prev,
+      taxes: prev.taxes.map((tax) => (tax.id === id ? { ...tax, rateInput: sanitized } : tax)),
+    }));
+  };
+
   const handleDownloadPdf = () => {
     generatePdf(
       {
@@ -150,8 +194,13 @@ export function InvoiceGenerator() {
         tanggal: formattedTanggal,
         noInvoice: combinedNoInvoice,
         items: data.items,
+        taxes: taxSummary.activeTaxes.map((tax) => ({
+          detailLabel: tax.detailLabel,
+          amount: tax.amount,
+        })),
       },
       subTotal,
+      taxSummary.grandTotal,
     );
   };
 
@@ -318,18 +367,104 @@ export function InvoiceGenerator() {
               </tbody>
             </table>
           </div>
+
+          <div className="mt-6">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="font-semibold text-sm">PAJAK (POTONGAN)</span>
+              <Button size="sm" variant="ghost" onClick={handleAddTax}>
+                <Plus className="mr-1 h-4 w-4" /> Tambah Pajak
+              </Button>
+            </div>
+            {data.taxes.length === 0 ? (
+              <div className="rounded-md border border-dashed px-4 py-3 text-slate-500 text-xs">
+                Belum ada potongan pajak. Klik &ldquo;Tambah Pajak&rdquo; jika ingin menambahkan
+                potongan (contoh: POT PPh 2,5%).
+              </div>
+            ) : (
+              <div className="overflow-hidden overflow-x-auto rounded-md border">
+                <table className="w-full min-w-[540px] text-sm">
+                  <thead className="bg-slate-100">
+                    <tr>
+                      <th className="p-3 text-left">NAMA PAJAK</th>
+                      <th className="w-[150px] p-3 text-right">PERSENTASE</th>
+                      <th className="w-[170px] p-3 text-right">POTONGAN</th>
+                      <th className="w-[48px] p-3 text-center" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.taxes.map((tax, index) => {
+                      const computed = taxSummary.computedTaxes[index];
+                      const amount = computed?.amount ?? 0;
+                      const rate = computed?.rate ?? 0;
+                      return (
+                        <tr key={tax.id} className="border-t align-middle">
+                          <td className="p-2">
+                            <Input
+                              type="text"
+                              placeholder="Contoh: POT PPh"
+                              className="h-9"
+                              value={tax.name}
+                              onChange={(e) => handleTaxNameChange(tax.id, e.target.value)}
+                            />
+                          </td>
+                          <td className="p-2">
+                            <div className="relative flex items-center">
+                              <Input
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="0"
+                                className="h-9 pr-7 text-right"
+                                value={tax.rateInput}
+                                onChange={(e) => handleTaxRateChange(tax.id, e.target.value)}
+                              />
+                              <span className="pointer-events-none absolute right-2.5 text-slate-500 text-xs">
+                                %
+                              </span>
+                            </div>
+                          </td>
+                          <td className="p-3 text-right font-medium text-slate-700">
+                            {rate > 0 ? `- ${formatInvoiceRp(amount)}` : '-'}
+                          </td>
+                          <td className="p-2 text-center">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label="Hapus pajak"
+                              className="text-red-500 hover:bg-red-50 hover:text-red-700"
+                              onClick={() => handleRemoveTax(tax.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
           <div className="mt-4 flex flex-col items-end gap-2 text-sm">
-            <div className="flex w-64 justify-between p-2">
-              <span className="font-semibold text-slate-500">SUB TOTAL :</span>
-              <span className="font-semibold">RP {subTotal.toLocaleString('id-ID')}</span>
+            <div className="flex w-full max-w-md justify-between gap-4 p-2">
+              <span className="shrink-0 font-semibold text-slate-500">SUB TOTAL :</span>
+              <span className="font-semibold">{formatInvoiceRp(subTotal)}</span>
             </div>
-            <div className="flex w-64 justify-between p-2">
-              <span className="font-semibold text-slate-500">PAJAK :</span>
-              <span className="font-semibold">-</span>
+            <div className="flex w-full max-w-md items-start justify-between gap-4 p-2">
+              <span className="shrink-0 font-semibold text-slate-500">PAJAK :</span>
+              {taxSummary.activeTaxes.length === 0 ? (
+                <span className="font-semibold">-</span>
+              ) : (
+                <div className="flex flex-col items-end gap-1 text-right font-semibold">
+                  {taxSummary.activeTaxes.map((tax) => (
+                    <span key={tax.id}>{tax.detailLabel}</span>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="flex w-64 justify-between rounded-md bg-slate-50 p-2 text-lg">
-              <span className="font-bold">TOTAL :</span>
-              <span className="font-bold">RP {subTotal.toLocaleString('id-ID')}</span>
+            <div className="flex w-full max-w-md justify-between gap-4 rounded-md bg-slate-50 p-2 text-lg">
+              <span className="shrink-0 font-bold">TOTAL :</span>
+              <span className="font-bold">{formatInvoiceRp(taxSummary.grandTotal)}</span>
             </div>
           </div>
         </div>
